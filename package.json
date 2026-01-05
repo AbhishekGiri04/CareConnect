@@ -1,0 +1,25 @@
+{
+  "name": "careconnect-integrated",
+  "version": "2.0.0",
+  "description": "CareConnect - Integrated accessibility platform with hand gesture control",
+  "main": "start.js",
+  "scripts": {
+    "start": "node start-gesture-system.js",
+    "backend": "cd backend && node server.js",
+    "frontend": "cd frontend && npm start",
+    "gesture": "node start-gesture-system.js",
+    "gesture-only": "cd backend && node server.js",
+    "dev": "npm run gesture",
+    "test-gesture": "echo 'Testing gesture system...' && node start-gesture-system.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "keywords": ["careconnect", "accessibility", "gesture-control", "smart-home", "mediapipe", "react"],
+  "author": "CareConnect Team",
+  "license": "MIT"
+}

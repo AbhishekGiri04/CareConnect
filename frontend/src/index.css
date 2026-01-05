@@ -1,0 +1,325 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Import Accessibility Styles */
+@import './accessibility.css';
+
+/* CSS Variables for Accessibility */
+:root {
+  --font-scale: 1;
+  --bg-primary: inherit;
+  --text-primary: inherit;
+  --border-color: inherit;
+}
+
+/* Accessibility Styles */
+.high-contrast {
+  filter: contrast(200%) brightness(1.3) !important;
+  background: var(--bg-primary, #000000) !important;
+  color: var(--text-primary, #ffffff) !important;
+}
+
+.high-contrast * {
+  border-color: var(--border-color, #ffffff) !important;
+  text-shadow: 0 0 3px rgba(255, 255, 255, 0.9) !important;
+  background-color: transparent !important;
+}
+
+.high-contrast .bg-gradient-to-br,
+.high-contrast .bg-gradient-to-r {
+  background: #000000 !important;
+  border: 2px solid #ffffff !important;
+}
+
+.high-contrast .text-slate-300,
+.high-contrast .text-slate-400,
+.high-contrast .text-white\/80,
+.high-contrast .text-white\/70 {
+  color: #ffffff !important;
+}
+
+/* Large Text Scaling */
+.large-text {
+  font-size: calc(1em * var(--font-scale, 1.5)) !important;
+}
+
+.large-text * {
+  font-size: calc(1em * var(--font-scale, 1.5)) !important;
+  line-height: 1.6 !important;
+}
+
+.large-text .text-xs {
+  font-size: calc(0.75rem * var(--font-scale, 1.5)) !important;
+}
+
+.large-text .text-sm {
+  font-size: calc(0.875rem * var(--font-scale, 1.5)) !important;
+}
+
+.large-text .text-base {
+  font-size: calc(1rem * var(--font-scale, 1.5)) !important;
+}
+
+.large-text .text-lg {
+  font-size: calc(1.125rem * var(--font-scale, 1.5)) !important;
+}
+
+.large-text .text-xl {
+  font-size: calc(1.25rem * var(--font-scale, 1.5)) !important;
+}
+
+.large-text .text-2xl {
+  font-size: calc(1.5rem * var(--font-scale, 1.5)) !important;
+}
+
+.large-text .text-3xl {
+  font-size: calc(1.875rem * var(--font-scale, 1.5)) !important;
+}
+
+.large-text .text-4xl {
+  font-size: calc(2.25rem * var(--font-scale, 1.5)) !important;
+}
+
+/* Screen Reader Enhancements */
+body[aria-live="polite"] {
+  speak: normal;
+}
+
+body[aria-live="polite"] button:focus,
+body[aria-live="polite"] a:focus {
+  outline: 3px solid #0066cc !important;
+  outline-offset: 2px !important;
+}
+
+/* Enhanced Focus Styles for Accessibility */
+.high-contrast *:focus,
+.large-text *:focus {
+  outline: 3px solid #ffff00 !important;
+  outline-offset: 3px !important;
+  box-shadow: 0 0 10px rgba(255, 255, 0, 0.8) !important;
+}
+
+/* Accessibility Button Focus */
+.accessibility-button:focus {
+  outline: 3px solid #f39c12 !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 6px rgba(243, 156, 18, 0.3) !important;
+}
+
+.high-contrast .accessibility-button:focus {
+  outline: 3px solid #ffff00 !important;
+  box-shadow: 0 0 0 6px rgba(255, 255, 0, 0.5) !important;
+}
+
+/* Button Enhancements for Large Text */
+.large-text button {
+  padding: calc(0.75rem * var(--font-scale, 1.5)) calc(1.5rem * var(--font-scale, 1.5)) !important;
+  min-height: calc(44px * var(--font-scale, 1.5)) !important;
+}
+
+/* High Contrast Button Fixes */
+.high-contrast button {
+  background: #000000 !important;
+  color: #ffffff !important;
+  border: 2px solid #ffffff !important;
+}
+
+.high-contrast button:hover {
+  background: #333333 !important;
+  color: #ffffff !important;
+}
+
+/* Glass effect */
+.glass {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Card hover effects */
+.card-hover {
+  transition: all 0.3s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+/* Button styles */
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+/* Loading animations */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Accessibility focus styles */
+*:focus {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
+}
+
+/* Screen reader only content */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* High contrast mode improvements */
+.high-contrast .bg-gradient-to-br {
+  background: #000000 !important;
+  border: 2px solid #ffffff !important;
+}
+
+.high-contrast .text-slate-300,
+.high-contrast .text-slate-400 {
+  color: #ffffff !important;
+}
+
+.high-contrast .bg-white\/10,
+.high-contrast .bg-white\/5 {
+  background: rgba(255, 255, 255, 0.3) !important;
+  border: 1px solid #ffffff !important;
+}
+
+/* High Contrast Button Active States */
+.high-contrast .accessibility-button.active {
+  background: #ffff00 !important;
+  color: #000000 !important;
+  border: 3px solid #000000 !important;
+}
+
+.high-contrast .accessibility-button:hover {
+  background: #ffffff !important;
+  color: #000000 !important;
+}
+
+/* Large Text Button Improvements */
+.large-text .accessibility-button {
+  padding: 1.5rem 2rem !important;
+  font-size: 1.25rem !important;
+}
+
+.large-text .accessibility-button span {
+  font-size: 2.5rem !important;
+}
+
+/* Smooth transitions */
+* {
+  transition: font-size 0.3s ease, filter 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Accessibility Transition Override */
+.high-contrast *,
+.large-text * {
+  transition: none !important;
+}
+
+/* Accessibility Button States */
+.accessibility-button {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.accessibility-button.active {
+  transform: scale(1.05);
+  box-shadow: 0 0 20px rgba(231, 76, 60, 0.5);
+}
+
+.accessibility-button.active::before {
+  content: '✓';
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #27ae60;
+  color: white;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: bold;
+  border: 2px solid white;
+  z-index: 10;
+}
+
+/* Vibration Indicator */
+.vibration-enabled::after {
+  content: '📳';
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  font-size: 16px;
+  animation: vibrationPulse 1s infinite;
+}
+
+@keyframes vibrationPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+}
+
+/* Screen Reader Active Indicator */
+.screen-reader-enabled .accessibility-button[aria-pressed="true"] {
+  border: 3px solid #f39c12;
+  box-shadow: 0 0 15px rgba(243, 156, 18, 0.5);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}

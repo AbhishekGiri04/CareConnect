@@ -1,0 +1,538 @@
+/* CareConnect Accessibility Styles - Complete Integration from Care Folder */
+
+/* Base Accessibility Variables */
+:root {
+  --accessibility-focus-color: #f39c12;
+  --accessibility-active-color: #e74c3c;
+  --accessibility-success-color: #27ae60;
+  --accessibility-warning-color: #f39c12;
+  --accessibility-danger-color: #e74c3c;
+  --accessibility-border-width: 3px;
+  --accessibility-transition: all 0.3s ease;
+  --status-safe: #27ae60;
+  --status-danger: #e74c3c;
+  --status-warning: #f39c12;
+}
+
+/* High Contrast Mode - Force Override */
+body.high-contrast {
+  background: #000000 !important;
+  color: #ffffff !important;
+  transition: none !important;
+}
+
+body.high-contrast *,
+body.high-contrast *::before,
+body.high-contrast *::after {
+  background: #000000 !important;
+  background-color: #000000 !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  border-color: #ffffff !important;
+  text-shadow: none !important;
+  box-shadow: none !important;
+  transition: none !important;
+  animation: none !important;
+}
+
+body.high-contrast .glass,
+body.high-contrast .bg-gradient-to-br,
+body.high-contrast .bg-gradient-to-r,
+body.high-contrast [class*="bg-"] {
+  background: #000000 !important;
+  background-color: #000000 !important;
+  background-image: none !important;
+  border: 2px solid #ffffff !important;
+}
+
+body.high-contrast button,
+body.high-contrast .accessibility-button {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border: 3px solid #000000 !important;
+  font-weight: bold !important;
+}
+
+body.high-contrast button.active,
+body.high-contrast button:hover,
+body.high-contrast .accessibility-button.active,
+body.high-contrast .accessibility-button:hover {
+  background: #ffff00 !important;
+  background-color: #ffff00 !important;
+  color: #000000 !important;
+  border: 3px solid #000000 !important;
+  transform: scale(1.1) !important;
+}
+
+body.high-contrast .text-white,
+body.high-contrast .text-slate-300,
+body.high-contrast .text-slate-400,
+body.high-contrast .text-blue-300,
+body.high-contrast .text-green-300,
+body.high-contrast .text-red-300,
+body.high-contrast .text-purple-300,
+body.high-contrast .text-orange-300 {
+  color: #ffffff !important;
+}
+
+body.high-contrast .bg-white\/10,
+body.high-contrast .bg-white\/5,
+body.high-contrast .bg-white\/20 {
+  background: #000000 !important;
+  border: 1px solid #ffffff !important;
+}
+
+/* Force all Tailwind background classes */
+body.high-contrast [class*="bg-slate"],
+body.high-contrast [class*="bg-gray"],
+body.high-contrast [class*="bg-blue"],
+body.high-contrast [class*="bg-green"],
+body.high-contrast [class*="bg-red"],
+body.high-contrast [class*="bg-purple"],
+body.high-contrast [class*="bg-orange"],
+body.high-contrast [class*="bg-yellow"] {
+  background: #000000 !important;
+  background-color: #000000 !important;
+}
+
+/* Large Text Mode */
+body.large-text {
+  font-size: 1.25em !important;
+}
+
+body.large-text * {
+  font-size: inherit !important;
+}
+
+body.large-text .text-xs {
+  font-size: 1rem !important;
+}
+
+body.large-text .text-sm {
+  font-size: 1.125rem !important;
+}
+
+body.large-text .text-base {
+  font-size: 1.25rem !important;
+}
+
+body.large-text .text-lg {
+  font-size: 1.5rem !important;
+}
+
+body.large-text .text-xl {
+  font-size: 1.75rem !important;
+}
+
+body.large-text .text-2xl {
+  font-size: 2rem !important;
+}
+
+body.large-text .text-3xl {
+  font-size: 2.5rem !important;
+}
+
+body.large-text .text-4xl {
+  font-size: 3rem !important;
+}
+
+body.large-text button {
+  padding: 1rem 1.5rem !important;
+  font-size: 1.25rem !important;
+}
+
+body.large-text .p-4 {
+  padding: 1.5rem !important;
+}
+
+body.large-text .p-6 {
+  padding: 2rem !important;
+}
+
+/* Accessibility Button States */
+.accessibility-button {
+  position: relative;
+  transition: var(--accessibility-transition);
+  border: 2px solid transparent;
+}
+
+.accessibility-button:focus {
+  outline: none;
+  border-color: var(--accessibility-focus-color);
+  box-shadow: 0 0 0 3px rgba(243, 156, 18, 0.3);
+}
+
+.accessibility-button.active {
+  background: var(--accessibility-active-color) !important;
+  color: white !important;
+  border-color: var(--accessibility-active-color);
+  transform: scale(1.05);
+}
+
+.accessibility-button.active::before {
+  content: '✓';
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: var(--accessibility-success-color);
+  color: white;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: bold;
+  border: 2px solid white;
+  z-index: 10;
+}
+
+/* High contrast active button override */
+body.high-contrast .accessibility-button.active::before {
+  background: #27ae60 !important;
+  color: #ffffff !important;
+  border: 2px solid #000000 !important;
+}
+
+.accessibility-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Screen Reader Support */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Screen Reader Announcements */
+.screen-reader-announcement {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+body[aria-live="polite"] .screen-reader-announcement {
+  position: static;
+  width: auto;
+  height: auto;
+  background: var(--accessibility-success-color);
+  color: white;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  margin: 0.5rem 0;
+  font-weight: bold;
+}
+
+/* Focus Indicators */
+*:focus {
+  outline: var(--accessibility-border-width) solid var(--accessibility-focus-color) !important;
+  outline-offset: 2px !important;
+}
+
+button:focus,
+input:focus,
+select:focus,
+textarea:focus {
+  outline: var(--accessibility-border-width) solid var(--accessibility-focus-color) !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 3px rgba(243, 156, 18, 0.3) !important;
+}
+
+/* Keyboard Navigation */
+.keyboard-navigation button:focus,
+.keyboard-navigation input:focus {
+  background: rgba(243, 156, 18, 0.1) !important;
+  border-color: var(--accessibility-focus-color) !important;
+}
+
+/* Vibration Feedback Indicator */
+.vibration-enabled {
+  position: relative;
+}
+
+.vibration-enabled::after {
+  content: '📳';
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  font-size: 12px;
+  animation: vibrationPulse 1s infinite;
+}
+
+@keyframes vibrationPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+}
+
+/* Voice Control Accessibility */
+.voice-control-active {
+  border: 2px solid var(--accessibility-success-color);
+  box-shadow: 0 0 10px rgba(39, 174, 96, 0.3);
+}
+
+.voice-listening {
+  animation: voicePulse 1.5s infinite;
+}
+
+@keyframes voicePulse {
+  0% { 
+    box-shadow: 0 0 0 0 rgba(39, 174, 96, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(39, 174, 96, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(39, 174, 96, 0);
+  }
+}
+
+/* Emergency Accessibility */
+.emergency-mode {
+  background: var(--accessibility-danger-color) !important;
+  color: white !important;
+  animation: emergencyFlash 0.5s infinite;
+}
+
+@keyframes emergencyFlash {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* Motion Reduced Preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Color Blind Friendly */
+.colorblind-friendly .bg-red-500 {
+  background: #d32f2f !important; /* Darker red */
+}
+
+.colorblind-friendly .bg-green-500 {
+  background: #388e3c !important; /* Darker green */
+}
+
+.colorblind-friendly .text-red-300 {
+  color: #f44336 !important;
+}
+
+.colorblind-friendly .text-green-300 {
+  color: #4caf50 !important;
+}
+
+/* Touch Target Sizes */
+@media (pointer: coarse) {
+  button,
+  input,
+  select,
+  textarea {
+    min-height: 44px !important;
+    min-width: 44px !important;
+  }
+  
+  .accessibility-button {
+    padding: 1rem 1.5rem !important;
+    font-size: 1.125rem !important;
+  }
+}
+
+/* Status Indicators */
+.status-indicator {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.status-indicator::before {
+  content: '';
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--status-color, #6b7280);
+}
+
+.status-indicator.active::before {
+  background: var(--accessibility-success-color);
+  animation: statusPulse 2s infinite;
+}
+
+.status-indicator.inactive::before {
+  background: var(--accessibility-danger-color);
+}
+
+@keyframes statusPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Accessibility Panel Styles */
+.accessibility-panel {
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  margin: 1rem 0;
+}
+
+.accessibility-controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.accessibility-option {
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 1rem;
+  padding: 1rem;
+  text-align: center;
+  cursor: pointer;
+  transition: var(--accessibility-transition);
+  position: relative;
+}
+
+.accessibility-option:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.accessibility-option.active {
+  background: var(--accessibility-active-color);
+  border-color: var(--accessibility-active-color);
+  color: white;
+}
+
+.accessibility-option .icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.accessibility-option .label {
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+/* Loading States */
+.accessibility-loading {
+  position: relative;
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.accessibility-loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 2px solid transparent;
+  border-top: 2px solid var(--accessibility-focus-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Error States */
+.accessibility-error {
+  border-color: var(--accessibility-danger-color) !important;
+  background: rgba(231, 76, 60, 0.1) !important;
+}
+
+.accessibility-error::before {
+  content: '⚠️';
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: var(--accessibility-danger-color);
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+
+/* Success States */
+.accessibility-success {
+  border-color: var(--accessibility-success-color) !important;
+  background: rgba(39, 174, 96, 0.1) !important;
+}
+
+/* Responsive Accessibility */
+@media (max-width: 768px) {
+  .accessibility-controls {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+  
+  .accessibility-option {
+    padding: 0.75rem;
+  }
+  
+  .accessibility-option .icon {
+    font-size: 1.5rem;
+  }
+  
+  .accessibility-option .label {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .accessibility-controls {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .accessibility-panel,
+  .accessibility-controls {
+    background: white !important;
+    color: black !important;
+    border: 1px solid black !important;
+  }
+  
+  .accessibility-option.active {
+    background: #f0f0f0 !important;
+    color: black !important;
+  }
+  
+  .accessibility-option.active::before {
+    content: '[ACTIVE] ';
+    position: static;
+    background: none;
+    color: black;
+    font-weight: bold;
+  }
+}
