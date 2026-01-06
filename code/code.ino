@@ -54,15 +54,17 @@ const char index_html[] PROGMEM = R"rawliteral(
   <div id="pirStatus">PIR Status: </div>
 
  <script>
+// Firebase config will be loaded from environment variables
+// This is a placeholder for security - actual config should be set via environment
 const firebaseConfig = {
-  apiKey: "AIzaSyBzajC2xLM4ByLYyMfQHY2ehoiNvjCrpkE",
-  authDomain: "smarthomeesp32-saarthi.firebaseapp.com",
-  databaseURL: "https://smarthomeesp32-saarthi-default-rtdb.firebaseio.com",
-  projectId: "smarthomeesp32-saarthi",
-  storageBucket: "smarthomeesp32-saarthi.firebasestorage.app",
-  messagingSenderId: "1045726965820",
-  appId: "1:1045726965820:web:feb96218879d8b82a49339",
-  measurementId: "G-24Y177SXPK"
+  apiKey: "YOUR_API_KEY_HERE",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  databaseURL: "YOUR_DATABASE_URL_HERE",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT.firebasestorage.app",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID",
+  measurementId: "YOUR_MEASUREMENT_ID"
 };
    firebase.initializeApp(firebaseConfig)
 

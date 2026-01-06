@@ -6,14 +6,14 @@ import { getDatabase } from "firebase/database";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyDpdj8Avn9fkP6muM93DJSRjaTgQgJCV7M",
-  authDomain: "smartassist-home.firebaseapp.com",
-  databaseURL: "https://smartassist-home-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "smartassist-home",
-  storageBucket: "smartassist-home.firebasestorage.app",
-  messagingSenderId: "330545353615",
-  appId: "1:330545353615:web:a1da293cccd1f67712f1fa",
-  measurementId: "G-JLQ3PK3N5M"
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+  databaseURL: process.env.REACT_APP_FIREBASE_DATABASE_URL,
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.REACT_APP_FIREBASE_APP_ID,
+  measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID
 };
 
 // Initialize Firebase

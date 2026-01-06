@@ -16,6 +16,13 @@ out/
 .env.test.local
 .env.production.local
 
+# Security files
+config.h
+service-account.json
+firebase-service-account.json
+*.pem
+*.key
+
 # IDE files
 .vscode/
 .idea/
