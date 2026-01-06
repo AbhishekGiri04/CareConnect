@@ -16,12 +16,16 @@ out/
 .env.test.local
 .env.production.local
 
-# Security files
+# Security files - NEVER COMMIT THESE
 config.h
 service-account.json
 firebase-service-account.json
 *.pem
 *.key
+
+# Sensitive files
+frontend/.env
+backend/.env
 
 # IDE files
 .vscode/
