@@ -10,7 +10,7 @@ const Auth = () => {
     password: ''
   });
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, signup, loginWithGoogle } = useAuth();
 
   const handleInputChange = (e) => {
     setFormData({
@@ -22,25 +22,42 @@ const Auth = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await login(formData.email, formData.password);
+      if (isSignUp) {
+        await signup(formData.email, formData.password, formData.name);
+      } else {
+        await login(formData.email, formData.password);
+      }
       navigate('/dashboard');
     } catch (error) {
       console.error('Auth error:', error);
+      alert(error.message || 'Authentication failed');
     }
   };
 
-  const handleGoogleAuth = () => {
-    // Google OAuth integration
-    console.log('Google auth clicked');
-    navigate('/dashboard');
+  const handleGoogleAuth = async () => {
+    try {
+      await loginWithGoogle();
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Google auth error:', error);
+      alert('Google authentication failed');
+    }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 p-5">
+    <div className="min-h-screen flex items-center justify-center p-5" style={{
+      background: 'linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url("https://myrealestate.in/storage/2023/03/Collage-Smart-Homes.jpg")',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundAttachment: 'fixed'
+    }}>
       <div className={`auth-wrapper ${isSignUp ? 'panel-active' : ''}`}>
         {/* Sign Up Form */}
         <div className="auth-form-box register-form-box">
           <form onSubmit={handleSubmit}>
+            <div className="logo">
+              <h2>CareConnect</h2>
+            </div>
             <h1>Create Account</h1>
             <div className="social-links">
               <a href="#" onClick={handleGoogleAuth} aria-label="Google">
@@ -83,6 +100,9 @@ const Auth = () => {
         {/* Sign In Form */}
         <div className="auth-form-box login-form-box">
           <form onSubmit={handleSubmit}>
+            <div className="logo">
+              <h2>CareConnect</h2>
+            </div>
             <h1>Sign In</h1>
             <div className="social-links">
               <a href="#" onClick={handleGoogleAuth} aria-label="Google">
@@ -106,7 +126,7 @@ const Auth = () => {
               onChange={handleInputChange}
               required 
             />
-            <a href="#">Forgot your password?</a>
+            <a href="#" className="forgot-password">Forgot your password?</a>
             <button type="submit">Sign In</button>
             <div className="mobile-switch">
               <p>Don't have an account?</p>
@@ -135,8 +155,23 @@ const Auth = () => {
       <style jsx>{`
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
         
+        .logo {
+          margin-bottom: 20px;
+        }
+
+        .logo h2 {
+          color: #3b82f6;
+          font-size: 28px;
+          font-weight: 700;
+          text-align: center;
+          margin: 0;
+          letter-spacing: 1px;
+        }
+        
         .auth-wrapper {
-          background-color: #fff;
+          background-color: rgba(255, 255, 255, 0.1);
+          backdrop-filter: blur(20px);
+          border: 1px solid rgba(255, 255, 255, 0.2);
           border-radius: 20px;
           box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
           position: relative;
@@ -204,7 +239,9 @@ const Auth = () => {
         }
 
         .slide-panel {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+          background-size: cover;
+          background-position: center;
           color: #FFFFFF;
           position: relative;
           left: -100%;
@@ -231,6 +268,8 @@ const Auth = () => {
           width: 50%;
           transform: translateX(0);
           transition: transform 0.6s ease-in-out;
+          background: rgba(0, 0, 0, 0.3);
+          backdrop-filter: blur(10px);
         }
 
         .panel-content-left {
@@ -251,14 +290,16 @@ const Auth = () => {
         }
 
         form {
-          background-color: #FFFFFF;
+          background-color: rgba(255, 255, 255, 0.95);
+          backdrop-filter: blur(10px);
           display: flex;
           align-items: center;
           justify-content: center;
           flex-direction: column;
-          padding: 0 50px;
+          padding: 40px 50px;
           height: 100%;
           text-align: center;
+          border-radius: 20px;
         }
 
         h1 {
@@ -269,8 +310,8 @@ const Auth = () => {
         }
 
         input {
-          background-color: #f3f4f6;
-          border: 2px solid transparent;
+          background-color: #f8f9fa;
+          border: 2px solid #e9ecef;
           border-radius: 12px;
           padding: 14px 18px;
           margin: 8px 0;
@@ -281,15 +322,15 @@ const Auth = () => {
 
         input:focus {
           outline: none;
-          border-color: #667eea;
+          border-color: #3b82f6;
           background-color: #fff;
-          box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
 
         button {
           border-radius: 25px;
           border: none;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
           color: #FFFFFF;
           font-size: 13px;
           font-weight: 600;
@@ -298,13 +339,13 @@ const Auth = () => {
           text-transform: uppercase;
           transition: all 0.3s ease;
           cursor: pointer;
-          box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+          box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
           margin: 10px 0;
         }
 
         button:hover {
           transform: translateY(-2px);
-          box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+          box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
         }
 
         button.transparent-btn {
@@ -331,56 +372,68 @@ const Auth = () => {
           height: 45px;
           width: 45px;
           transition: all 0.3s ease;
-          color: #667eea;
+          color: #3b82f6;
           text-decoration: none;
         }
 
         .social-links a:hover {
-          border-color: #667eea;
-          background: #667eea;
+          border-color: #3b82f6;
+          background: #3b82f6;
           color: #fff;
           transform: translateY(-3px);
-          box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+          box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
         }
 
         span {
           font-size: 13px;
           color: #666;
-          margin: 10px 0;
+          margin: 15px 0;
+          display: block;
         }
 
         a {
-          color: #667eea;
+          color: #3b82f6;
           font-size: 14px;
           text-decoration: none;
           margin: 15px 0;
         }
 
+        .forgot-password {
+          display: block;
+          text-align: center;
+          margin: 10px 0 20px 0;
+        }
+
         .mobile-switch {
           display: none;
           margin-top: 20px;
-          color: #667eea;
-          font-size: 14px;
         }
 
         .mobile-switch p {
-          margin: 10px 0;
+          color: #666;
           font-size: 14px;
+          margin: 10px 0;
         }
 
         .mobile-switch button {
           background: transparent;
-          color: #667eea;
-          border: 2px solid #667eea;
+          color: #3b82f6;
+          border: 2px solid #3b82f6;
           padding: 10px 30px;
-          margin-top: 10px;
+          font-size: 12px;
           box-shadow: none;
+        }
+
+        .mobile-switch button:hover {
+          background: #3b82f6;
+          color: #fff;
         }
 
         @media (max-width: 768px) {
           .auth-wrapper {
             width: 100%;
             border-radius: 15px;
+            background-color: rgba(255, 255, 255, 0.95);
           }
 
           .auth-form-box {
@@ -405,6 +458,11 @@ const Auth = () => {
           form {
             padding: 30px 25px;
             height: auto;
+            background-color: rgba(255, 255, 255, 0.95);
+          }
+
+          .logo h2 {
+            font-size: 20px;
           }
 
           .mobile-switch {

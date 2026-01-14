@@ -4,6 +4,7 @@ const path = require('path');
 const cors = require('cors');
 const axios = require('axios');
 const fs = require('fs');
+require('dotenv').config();
 
 const app = express();
 const PORT = 3001;
@@ -14,9 +15,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 app.use(session({
-    secret: 'smart-home-secret',
+    secret: process.env.SESSION_SECRET || 'smart-home-secret-' + Date.now(),
     resave: false,
-    saveUninitialized: true
+    saveUninitialized: true,
+    cookie: { secure: process.env.NODE_ENV === 'production' }
 }));
 
 // SmartAssist Backend URL

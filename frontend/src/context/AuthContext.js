@@ -1,7 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { auth } from '../firebase/config';
-import axios from 'axios';
+import { onAuthStateChanged, signOut, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth, googleProvider } from '../firebase/config';
 
 const AuthContext = createContext();
 
@@ -32,48 +31,66 @@ const AuthProvider = ({ children }) => {
     return () => unsubscribe();
   }, []);
 
-  const login = async (email, password) => {
-    // Demo login for frontend testing
-    if (email === 'user@demo.com' && password === 'password123') {
-      const mockUser = { 
-        id: '1', 
-        name: 'John Doe', 
-        email: email,
-        photoURL: null,
-        role: 'user' 
-      };
-      const mockToken = 'demo-token-123';
-      setToken(mockToken);
-      setUser(mockUser);
-      localStorage.setItem('token', mockToken);
-      return { token: mockToken, user: mockUser };
-    }
-    
-    // Handle Google auth users
-    if (password === 'google_auth') {
-      const mockUser = {
-        id: '2',
-        name: email.split('@')[0],
-        email: email,
-        photoURL: null,
+  const loginWithGoogle = async () => {
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const firebaseUser = result.user;
+      const userData = {
+        id: firebaseUser.uid,
+        name: firebaseUser.displayName,
+        email: firebaseUser.email,
+        photoURL: firebaseUser.photoURL,
         role: 'user'
       };
-      const mockToken = 'google-token-123';
-      setToken(mockToken);
-      setUser(mockUser);
-      localStorage.setItem('token', mockToken);
-      return { token: mockToken, user: mockUser };
-    }
-    
-    // Real API call (when backend is running)
-    try {
-      const response = await axios.post('http://localhost:5004/api/auth/login', { email, password });
-      setToken(response.data.token);
-      setUser(response.data.user);
-      localStorage.setItem('token', response.data.token);
-      return response.data;
+      setUser(userData);
+      setToken('firebase-token');
+      localStorage.setItem('token', 'firebase-token');
+      return { user: userData };
     } catch (error) {
-      throw new Error('Invalid credentials');
+      console.error('Google login error:', error);
+      throw error;
+    }
+  };
+
+  const login = async (email, password) => {
+    try {
+      const result = await signInWithEmailAndPassword(auth, email, password);
+      const firebaseUser = result.user;
+      const userData = {
+        id: firebaseUser.uid,
+        name: firebaseUser.displayName || email.split('@')[0],
+        email: firebaseUser.email,
+        photoURL: firebaseUser.photoURL,
+        role: 'user'
+      };
+      setUser(userData);
+      setToken('firebase-token');
+      localStorage.setItem('token', 'firebase-token');
+      return { user: userData };
+    } catch (error) {
+      console.error('Login error:', error);
+      throw error;
+    }
+  };
+
+  const signup = async (email, password, name) => {
+    try {
+      const result = await createUserWithEmailAndPassword(auth, email, password);
+      const firebaseUser = result.user;
+      const userData = {
+        id: firebaseUser.uid,
+        name: name || email.split('@')[0],
+        email: firebaseUser.email,
+        photoURL: firebaseUser.photoURL,
+        role: 'user'
+      };
+      setUser(userData);
+      setToken('firebase-token');
+      localStorage.setItem('token', 'firebase-token');
+      return { user: userData };
+    } catch (error) {
+      console.error('Signup error:', error);
+      throw error;
     }
   };
 
@@ -81,18 +98,15 @@ const AuthProvider = ({ children }) => {
     try {
       await signOut(auth);
     } catch (error) {
-      console.error('Firebase logout error:', error);
+      console.error('Logout error:', error);
     }
     setToken(null);
     setUser(null);
     localStorage.removeItem('token');
-    window.location.href = 'http://localhost:3002/';
   };
 
-
-
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, token, login, signup, loginWithGoogle, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );

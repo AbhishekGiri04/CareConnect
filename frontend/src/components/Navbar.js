@@ -6,9 +6,12 @@ const Navbar = () => {
   
   const navItems = [
     { path: '/dashboard', icon: '🏠', label: 'Home', gradient: 'from-blue-500 to-purple-600' },
-    { path: '/devices', icon: '🎛️', label: 'Devices', gradient: 'from-green-500 to-emerald-600' },
-    { path: '/gesture', icon: '✋', label: 'Gesture', gradient: 'from-purple-500 to-indigo-600' },
-    { path: '/alerts', icon: '🚨', label: 'Alerts', gradient: 'from-red-500 to-pink-600' },
+    { path: '/devices', icon: '💡', label: 'Devices', gradient: 'from-green-500 to-emerald-600' },
+    { path: '/gesture', icon: '👆', label: 'Gesture', gradient: 'from-purple-500 to-indigo-600' },
+    { path: '/alerts', icon: '🔔', label: 'Alerts', gradient: 'from-red-500 to-pink-600' },
+    { path: '/communication', icon: '💬', label: 'Communication', gradient: 'from-cyan-500 to-blue-600' },
+    { path: '/security', icon: '🔒', label: 'Security', gradient: 'from-yellow-500 to-orange-600' },
+    { path: '/emergency', icon: '🆘', label: 'SOS', gradient: 'from-red-600 to-red-800' },
   ];
 
   if (location.pathname === '/') return null;
