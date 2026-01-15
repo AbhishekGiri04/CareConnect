@@ -114,57 +114,69 @@ CareConnect is a revolutionary IoT accessibility platform that transforms daily 
 ```
 CareConnect/
 ├── 📂 frontend/                    # 🎨 React frontend application (Port 3002)
+│   ├── 📂 public/                  # Public assets
+│   │   ├── 📄 index.html           # HTML template
+│   │   └── 📄 LoadingPage.mov      # Loading animation
 │   ├── 📂 src/
 │   │   ├── 📂 components/          # 🧩 Reusable UI components
-│   │   │   ├── 📄 Auth.js               # 🔐 Authentication component
-│   │   │   ├── 📄 Navbar.js             # 🔝 Navigation header
-│   │   │   ├── 📄 TopNavbar.js          # 🔝 Top navigation bar
-│   │   │   ├── 📄 Footer.js             # 🔻 Footer component
-│   │   │   ├── 📄 LoadingScreen.js      # ⏳ Loading animation
 │   │   │   ├── 📄 AccessibilitySettings.js # ♿ Accessibility controls
-│   │   │   └── 📄 HackathonDemo.js      # 🎯 Demo component
-│   │   ├── 📂 pages/               # 📄 Main application pages
-│   │   │   ├── 📄 Dashboard.js          # 🏠 Main dashboard
-│   │   │   ├── 📄 DeviceControl.js      # 🔌 Device management
-│   │   │   ├── 📄 GestureControl.js     # 👋 Gesture recognition
-│   │   │   ├── 📄 Communication.js      # 💬 Communication hub
-│   │   │   ├── 📄 Emergency.js          # 🚨 Emergency system
-│   │   │   ├── 📄 Security.js           # 🔒 Security features
-│   │   │   ├── 📄 Analytics.js          # 📊 Analytics dashboard
-│   │   │   ├── 📄 Alerts.js             # 🔔 Alert management
-│   │   │   ├── 📄 CaregiverDashboard.js # 👥 Caregiver interface
-│   │   │   ├── 📄 HealthMonitoring.js   # 🏥 Health tracking
-│   │   │   ├── 📄 DeviceSetup.js        # ⚙️ Device configuration
-│   │   │   └── 📄 BackendController.js  # 🔧 Backend management
+│   │   │   ├── 📄 Auth.js          # 🔐 Authentication component
+│   │   │   ├── 📄 Footer.js        # 🔻 Footer component
+│   │   │   ├── 📄 GlobalAccessibility.js # Global accessibility
+│   │   │   ├── 📄 LoadingScreen.js # ⏳ Loading animation
+│   │   │   ├── 📄 Navbar.js        # 🔝 Navigation header
+│   │   │   ├── 📄 SafetyStatus.js  # 🛡️ Safety monitoring
+│   │   │   ├── 📄 TopNavbar.js     # 🔝 Top navigation bar
+│   │   │   └── 📄 VoiceControl.js  # 🎤 Voice command control
 │   │   ├── 📂 context/             # 🔄 React context providers
-│   │   │   ├── 📄 AuthContext.js        # 🔐 Authentication state
-│   │   │   ├── 📄 SocketContext.js      # 🔌 Socket connection
-│   │   │   └── 📄 AccessibilityContext.js # ♿ Accessibility state
-│   │   └── 📄 App.js               # 🚀 Main application
-│   └── 📄 package.json             # 📦 Frontend dependencies
+│   │   │   ├── 📄 AccessibilityContext.js # ♿ Accessibility state
+│   │   │   ├── 📄 AuthContext.js   # 🔐 Authentication state
+│   │   │   └── 📄 SocketContext.js # 🔌 Socket connection
+│   │   ├── 📂 firebase/            # 🔥 Firebase configuration
+│   │   │   └── 📄 config.js        # Firebase setup
+│   │   ├── 📂 pages/               # 📄 Main application pages
+│   │   │   ├── 📄 Alerts.js        # 🔔 Alert management
+│   │   │   ├── 📄 Analytics.js     # 📊 Analytics dashboard
+│   │   │   ├── 📄 BackendController.js # 🔧 Backend management
+│   │   │   ├── 📄 CaregiverDashboard.js # 👥 Caregiver interface
+│   │   │   ├── 📄 Communication.js # 💬 Communication hub
+│   │   │   ├── 📄 Dashboard.js     # 🏠 Main dashboard
+│   │   │   ├── 📄 DeviceControl.js # 🔌 Device management
+│   │   │   ├── 📄 DeviceSetup.js   # ⚙️ Device configuration
+│   │   │   ├── 📄 Emergency.js     # 🚨 Emergency system
+│   │   │   ├── 📄 GestureControl.js # 👋 Gesture recognition
+│   │   │   ├── 📄 HealthMonitoring.js # 🏥 Health tracking
+│   │   │   └── 📄 Security.js      # 🔒 Security features
+│   │   ├── 📂 services/            # 🔧 API services
+│   │   │   └── 📄 api.js           # API configuration
+│   │   ├── 📄 accessibility-global.js # Global accessibility
+│   │   ├── 📄 accessibility.css    # Accessibility styles
+│   │   ├── 📄 App.js               # 🚀 Main application
+│   │   ├── 📄 index.css            # Global styles
+│   │   └── 📄 index.js             # React entry point
+│   ├── 📄 .env                     # Environment variables
+│   ├── 📄 Dockerfile               # Docker configuration
+│   ├── 📄 package.json             # 📦 Frontend dependencies
+│   └── 📄 tailwind.config.js       # Tailwind CSS config
 ├── 📂 backend/                     # 🔧 Node.js backend service (Port 3001)
-│   ├── 📂 routes/                  # 🛣️ API routes
-│   │   ├── 📄 gesture.js                # 👋 Gesture control routes
-│   │   ├── 📄 devices.js                # 🔌 Device management routes
-│   │   ├── 📄 emergency.js              # 🚨 Emergency routes
-│   │   ├── 📄 communication.js          # 💬 Communication routes
-│   │   └── 📄 analytics.js              # 📊 Analytics routes
-│   ├── 📂 models/                  # 📋 Database models
-│   │   ├── 📄 Device.js                 # 🔌 Device schema
-│   │   ├── 📄 User.js                   # 👤 User schema
-│   │   └── 📄 Alert.js                  # 🔔 Alert schema
-│   ├── 📂 middleware/              # 🔒 Middleware functions
-│   │   ├── 📄 auth.js                   # 🔐 Authentication middleware
-│   │   └── 📄 validation.js             # ✅ Input validation
+│   ├── 📄 .env                     # Backend environment variables
+│   ├── 📄 accessibility-settings.json # Accessibility config
+│   ├── 📄 gesture-mediapipe.js     # MediaPipe gesture detection
+│   ├── 📄 package.json             # 📦 Backend dependencies
 │   └── 📄 server.js                # 🚀 Express server
-├── 📂 Auth_Screens/                # 🔐 Authentication UI
-│   └── 📂 auth_screens/
-│       ├── 📄 index.html                # 🔑 Auth interface
-│       └── 📄 style.css                 # 🎨 Auth styling
-├── 📄 start.js                     # 🚀 Start all services
-├── 📄 package.json                 # 📦 Root dependencies
+├── 📂 code/                        # 🤖 Arduino/IoT code
+│   └── 📄 code.ino                 # Arduino sketch
+├── 📂 scripts/                     # 🛠️ Utility scripts
+│   ├── 📄 README.md                # Scripts documentation
+│   ├── 📄 security-check.js        # Security validation
+│   └── 📄 voice-startup.js         # Voice system startup
 ├── 📄 .gitignore                   # 🚫 Git ignore patterns
-└── 📄 README.md                    # 📖 Project documentation
+├── 📄 LICENSE                      # 📜 MIT License
+├── 📄 package.json                 # 📦 Root dependencies
+├── 📄 README.md                    # 📖 Project documentation
+├── 📄 script.js                    # Utility script
+├── 📄 start.js                     # 🚀 Start all services
+└── 📄 start.sh                     # Shell startup script
 ```
 <br>
 
@@ -483,6 +495,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**© 2025 CareConnect. All Rights Reserved.**
+**© 2026 CareConnect. All Rights Reserved.**
 
 </div>

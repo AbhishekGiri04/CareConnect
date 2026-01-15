@@ -139,12 +139,12 @@ const Auth = () => {
         <div className="slide-panel-wrapper">
           <div className="slide-panel">
             <div className="panel-content panel-content-left">
-              <h1>Welcome Back!</h1>
+              <h1 style={{color: '#d1d5db'}}>Welcome Back!</h1>
               <p>Stay connected by logging in with your credentials and continue your CareConnect experience</p>
               <button className="transparent-btn" onClick={() => setIsSignUp(false)}>Sign In</button>
             </div>
             <div className="panel-content panel-content-right">
-              <h1>Hey There!</h1>
+              <h1 style={{color: '#d1d5db'}}>Hey There!</h1>
               <p>Begin your amazing journey with CareConnect by creating an account with us today</p>
               <button className="transparent-btn" onClick={() => setIsSignUp(true)}>Sign Up</button>
             </div>

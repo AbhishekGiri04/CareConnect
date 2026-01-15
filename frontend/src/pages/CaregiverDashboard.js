@@ -105,7 +105,7 @@ const CaregiverDashboard = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <div className="w-16 h-16 bg-gradient-to-r from-pink-500 to-red-600 rounded-2xl flex items-center justify-center shadow-lg">
-                <span className="text-3xl">👩‍⚕️</span>
+                <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4M11,7H13V9H15V11H13V13H11V11H9V9H11V7Z"/></svg>
               </div>
               <div>
                 <h1 className="text-3xl font-bold text-white mb-1">Caregiver Dashboard</h1>
@@ -128,7 +128,7 @@ const CaregiverDashboard = () => {
           <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-3xl p-6 shadow-2xl">
             <div className="flex items-center justify-between mb-3">
               <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center">
-                <span className="text-3xl">👥</span>
+                <svg className="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M16,17V19H2V17S2,13 9,13 16,17 16,17M12.5,7.5A3.5,3.5 0 0,1 9,11A3.5,3.5 0 0,1 5.5,7.5A3.5,3.5 0 0,1 9,4A3.5,3.5 0 0,1 12.5,7.5M15.94,13A5.32,5.32 0 0,1 18,17V19H22V17S22,13.37 15.94,13M15,4A3.39,3.39 0 0,0 13.07,4.59A5,5 0 0,1 13.07,10.41A3.39,3.39 0 0,0 15,11A3.5,3.5 0 0,0 18.5,7.5A3.5,3.5 0 0,0 15,4Z"/></svg>
               </div>
               <span className="text-blue-200 text-sm font-medium">Total</span>
             </div>
@@ -139,7 +139,7 @@ const CaregiverDashboard = () => {
           <div className="bg-gradient-to-br from-orange-600 to-red-700 rounded-3xl p-6 shadow-2xl">
             <div className="flex items-center justify-between mb-3">
               <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center">
-                <span className="text-3xl">🚨</span>
+                <svg className="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12,2L1,21H23M12,6L19.53,19H4.47M11,10V14H13V10M11,16V18H13V16"/></svg>
               </div>
               <span className="text-orange-200 text-sm font-medium">Active</span>
             </div>
@@ -150,7 +150,7 @@ const CaregiverDashboard = () => {
           <div className="bg-gradient-to-br from-red-600 to-pink-700 rounded-3xl p-6 shadow-2xl">
             <div className="flex items-center justify-between mb-3">
               <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center">
-                <span className="text-3xl">⚠️</span>
+                <svg className="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12,2L1,21H23M12,6L19.53,19H4.47M11,10V14H13V10M11,16V18H13V16"/></svg>
               </div>
               <span className="text-red-200 text-sm font-medium">Critical</span>
             </div>
@@ -163,7 +163,7 @@ const CaregiverDashboard = () => {
           {/* Patient Status */}
           <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/80 backdrop-blur-xl border border-slate-700/50 rounded-3xl p-6 shadow-2xl">
             <h2 className="text-2xl font-bold text-white mb-6 flex items-center space-x-2">
-              <span>👥</span>
+              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M16,17V19H2V17S2,13 9,13 16,17 16,17M12.5,7.5A3.5,3.5 0 0,1 9,11A3.5,3.5 0 0,1 5.5,7.5A3.5,3.5 0 0,1 9,4A3.5,3.5 0 0,1 12.5,7.5M15.94,13A5.32,5.32 0 0,1 18,17V19H22V17S22,13.37 15.94,13M15,4A3.39,3.39 0 0,0 13.07,4.59A5,5 0 0,1 13.07,10.41A3.39,3.39 0 0,0 15,11A3.5,3.5 0 0,0 18.5,7.5A3.5,3.5 0 0,0 15,4Z"/></svg>
               <span>Patient Status</span>
             </h2>
             <div className="space-y-4">
@@ -221,7 +221,7 @@ const CaregiverDashboard = () => {
           {/* Active Alerts */}
           <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/80 backdrop-blur-xl border border-slate-700/50 rounded-3xl p-6 shadow-2xl">
             <h2 className="text-2xl font-bold text-white mb-6 flex items-center space-x-2">
-              <span>🚨</span>
+              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12,2L1,21H23M12,6L19.53,19H4.47M11,10V14H13V10M11,16V18H13V16"/></svg>
               <span>Active Alerts</span>
             </h2>
             <div className="space-y-4 max-h-96 overflow-y-auto">
@@ -240,10 +240,16 @@ const CaregiverDashboard = () => {
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center space-x-2 mb-2">
-                          <span className="text-lg">
-                            {alert.type === 'fall_detection' ? '🚨' :
-                             alert.type === 'health_alert' ? '❤️' :
-                             alert.type === 'emergency_button' ? '🆘' : '⚠️'}
+                          <span>
+                            {alert.type === 'fall_detection' ? (
+                              <svg className="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12,2L1,21H23M12,6L19.53,19H4.47M11,10V14H13V10M11,16V18H13V16"/></svg>
+                            ) : alert.type === 'health_alert' ? (
+                              <svg className="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                            ) : alert.type === 'emergency_button' ? (
+                              <svg className="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12,2L1,21H23M12,6L19.53,19H4.47M11,10V14H13V10M11,16V18H13V16"/></svg>
+                            ) : (
+                              <svg className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12,2L1,21H23M12,6L19.53,19H4.47M11,10V14H13V10M11,16V18H13V16"/></svg>
+                            )}
                           </span>
                           <h3 className="font-semibold text-white">
                             {alert.userId?.name || 'Unknown Patient'}
@@ -279,7 +285,7 @@ const CaregiverDashboard = () => {
         {/* Recent Health Data */}
         <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/80 backdrop-blur-xl border border-slate-700/50 rounded-3xl p-6 shadow-2xl">
           <h2 className="text-2xl font-bold text-white mb-6 flex items-center space-x-2">
-            <span>📊</span>
+            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M16,11.78L20.24,4.45L21.97,5.45L16.74,14.5L10.23,10.75L5.46,19H22V21H2V3H4V17.54L9.5,8L16,11.78Z"/></svg>
             <span>Recent Health Data</span>
           </h2>
           <div className="space-y-4">
@@ -288,7 +294,7 @@ const CaregiverDashboard = () => {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
                     <div className="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center border border-red-400/30">
-                      <span className="text-xl">💓</span>
+                      <svg className="w-6 h-6 text-red-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
                     </div>
                     <div>
                       <p className="font-semibold text-white">{data.userId?.name || 'Unknown Patient'}</p>

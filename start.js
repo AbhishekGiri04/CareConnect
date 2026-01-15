@@ -97,7 +97,7 @@ function startServices() {
     });
     
     log('\n🌐 CareConnect is starting up...', 'green');
-    log('   Frontend: http://localhost:3000', 'cyan');
+    log('   Frontend: http://localhost:3002', 'cyan');
     log('   Backend:  http://localhost:3001', 'cyan');
     log('   Press Ctrl+C to stop all services\n', 'yellow');
 }

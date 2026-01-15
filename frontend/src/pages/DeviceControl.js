@@ -102,15 +102,24 @@ const DeviceControl = () => {
       }
     });
     
-    // Strong vibration for emergency
+    // Voice feedback
+    if ('speechSynthesis' in window) {
+      speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance('Emergency activated! All lights are now on');
+      utterance.rate = 1.1;
+      utterance.volume = 1;
+      speechSynthesis.speak(utterance);
+    }
+    
+    // Vibration
     if (navigator.vibrate) {
       navigator.vibrate([200, 100, 200, 100, 200]);
     }
     
-    // Screen reader announcement
+    // Screen reader
     announceToScreenReader('Emergency activated. All lights are now on.');
     
-    // Visual flash for deaf users
+    // Visual flash
     document.body.style.backgroundColor = '#ff0000';
     setTimeout(() => {
       document.body.style.backgroundColor = '';

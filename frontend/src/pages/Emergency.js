@@ -97,7 +97,7 @@ const Emergency = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <div className="w-16 h-16 bg-gradient-to-r from-red-500 to-rose-600 rounded-2xl flex items-center justify-center shadow-lg">
-              <svg className="w-9 h-9 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 1L15.09 8.26L23 9L15.09 9.74L12 17L8.91 9.74L1 9L8.91 8.26L12 1Z"/></svg>
+              <svg className="w-9 h-9 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12,2L1,21H23M12,6L19.53,19H4.47M11,10V14H13V10M11,16V18H13V16"/></svg>
             </div>
             <div>
               <h1 className="text-3xl font-bold text-white mb-1">Emergency Center</h1>
@@ -187,7 +187,6 @@ const Emergency = () => {
               className="bg-green-100 text-green-700 px-4 py-2 rounded-xl border border-green-300 hover:bg-green-200 transition-all"
             >
               <div className="flex items-center space-x-2">
-                <span>➕</span>
                 <span>Add Contact</span>
               </div>
             </button>
@@ -196,7 +195,6 @@ const Emergency = () => {
               className="bg-red-100 text-red-700 px-4 py-2 rounded-xl border border-red-300 hover:bg-red-200 transition-all"
             >
               <div className="flex items-center space-x-2">
-                <span>🚨</span>
                 <span>Test Alert</span>
               </div>
             </button>
@@ -207,12 +205,17 @@ const Emergency = () => {
             <div key={contact.id} className="bg-gray-50 rounded-2xl p-4 border border-gray-200">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center text-2xl ${
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
                     contact.type === 'Doctor' ? 'bg-blue-100' :
                     contact.type === 'Family' ? 'bg-green-100' : 'bg-red-100'
                   }`}>
-                    {contact.type === 'Doctor' ? '👨⚕️' :
-                     contact.type === 'Family' ? '👨👩👦' : '🚨'}
+                    {contact.type === 'Doctor' ? (
+                      <svg className="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4M11,7H13V9H15V11H13V13H11V11H9V9H11V7Z"/></svg>
+                    ) : contact.type === 'Family' ? (
+                      <svg className="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 24 24"><path d="M16,17V19H2V17S2,13 9,13 16,17 16,17M12.5,7.5A3.5,3.5 0 0,1 9,11A3.5,3.5 0 0,1 5.5,7.5A3.5,3.5 0 0,1 9,4A3.5,3.5 0 0,1 12.5,7.5M15.94,13A5.32,5.32 0 0,1 18,17V19H22V17S22,13.37 15.94,13M15,4A3.39,3.39 0 0,0 13.07,4.59A5,5 0 0,1 13.07,10.41A3.39,3.39 0 0,0 15,11A3.5,3.5 0 0,0 18.5,7.5A3.5,3.5 0 0,0 15,4Z"/></svg>
+                    ) : (
+                      <svg className="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12,2L1,21H23M12,6L19.53,19H4.47M11,10V14H13V10M11,16V18H13V16"/></svg>
+                    )}
                   </div>
                   <div>
                     <p className="text-gray-800 font-medium">{contact.name}</p>
@@ -220,11 +223,13 @@ const Emergency = () => {
                   </div>
                 </div>
                 <div className="flex space-x-2">
-                  <button className="bg-green-100 text-green-700 px-4 py-2 rounded-lg text-sm border border-green-300">
-                    📞 Call
+                  <button className="bg-green-100 text-green-700 px-4 py-2 rounded-lg text-sm border border-green-300 flex items-center space-x-1">
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M6.62,10.79C8.06,13.62 10.38,15.94 13.21,17.38L15.41,15.18C15.69,14.9 16.08,14.82 16.43,14.93C17.55,15.3 18.75,15.5 20,15.5A1,1 0 0,1 21,16.5V20A1,1 0 0,1 20,21A17,17 0 0,1 3,4A1,1 0 0,1 4,3H7.5A1,1 0 0,1 8.5,4C8.5,5.25 8.7,6.45 9.07,7.57C9.18,7.92 9.1,8.31 8.82,8.59L6.62,10.79Z"/></svg>
+                    <span>Call</span>
                   </button>
-                  <button className="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg text-sm border border-blue-300">
-                    💬 Text
+                  <button className="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg text-sm border border-blue-300 flex items-center space-x-1">
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M20,2H4A2,2 0 0,0 2,4V22L6,18H20A2,2 0 0,0 22,16V4A2,2 0 0,0 20,2M6,9H18V11H6M14,14H6V12H14M18,8H6V6H18"/></svg>
+                    <span>Text</span>
                   </button>
                 </div>
               </div>
@@ -245,7 +250,6 @@ const Emergency = () => {
             className="bg-gradient-to-r from-blue-500/20 to-cyan-500/20 text-blue-300 px-4 py-2 rounded-xl border border-blue-400/30 hover:bg-blue-500/30 transition-all"
           >
             <div className="flex items-center space-x-2">
-              <span>⚕️</span>
               <span>Set Medical Info</span>
             </div>
           </button>
@@ -287,7 +291,6 @@ const Emergency = () => {
             className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-300 px-4 py-2 rounded-xl border border-green-400/30 hover:bg-green-500/30 transition-all"
           >
             <div className="flex items-center space-x-2">
-              <span>➕</span>
               <span>Add Medication</span>
             </div>
           </button>

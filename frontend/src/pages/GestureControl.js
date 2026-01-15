@@ -223,7 +223,7 @@ const GestureControl = () => {
   const startGestureDetection = async () => {
     setGestureEnabled(true);
     setIsDetecting(true);
-    setGestureStatus('🚀 Initializing TensorFlow gesture recognition...');
+    setGestureStatus('Initializing TensorFlow gesture recognition...');
     
     try {
       // Load TensorFlow.js and HandPose model
@@ -402,7 +402,6 @@ const GestureControl = () => {
         {/* Finger Control Guide */}
         <div className="bg-white/10 rounded-2xl p-4 border border-white/20">
           <div className="flex items-center space-x-2 mb-3">
-            <span className="text-xl">❓</span>
             <span className="text-white font-semibold">Help</span>
           </div>
           <p className="text-white/80 mb-3">Show 1-4 fingers to toggle LEDs</p>

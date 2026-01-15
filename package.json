@@ -8,13 +8,10 @@
     "dev": "node start.js",
     "backend": "cd backend && npm start",
     "frontend": "cd frontend && npm start",
-    "gesture": "node start-gesture-system.js",
     "setup": "npm install && cd frontend && npm install && cd ../backend && npm install",
     "build": "cd frontend && npm run build",
-    "test": "echo 'Running tests...' && npm run test:backend && npm run test:frontend",
-    "test:backend": "cd backend && npm test",
-    "test:frontend": "cd frontend && npm test",
-    "security-check": "node scripts/security-check.js"
+    "security-check": "node scripts/security-check.js",
+    "voice-startup": "node scripts/voice-startup.js"
   },
   "dependencies": {
     "express": "^4.18.2",

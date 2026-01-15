@@ -461,7 +461,6 @@ const VoiceControl = ({ devices, onDeviceControl }) => {
     <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/90 border border-slate-600/50 rounded-3xl p-6 shadow-2xl">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-white font-bold text-xl flex items-center space-x-2">
-          <span>🎤</span>
           <span>Voice Control</span>
         </h3>
         <div className={`w-3 h-3 rounded-full ${isListening ? 'bg-red-400 animate-pulse' : 'bg-gray-400'}`}></div>
@@ -471,7 +470,6 @@ const VoiceControl = ({ devices, onDeviceControl }) => {
         {isContinuousMode && (
           <div className="bg-orange-500/20 border border-orange-400/30 rounded-xl p-3">
             <p className="text-orange-300 text-sm font-medium flex items-center space-x-2">
-              <span>🔄</span>
               <span>Continuous Mode Active - Always listening for commands</span>
             </p>
           </div>
@@ -480,7 +478,7 @@ const VoiceControl = ({ devices, onDeviceControl }) => {
         <div className="bg-slate-700/50 rounded-xl p-4 border border-slate-600/30">
           <p className="text-slate-300 text-sm mb-2">Current Status:</p>
           <p className="text-white font-medium">
-            {isListening ? '🎙️ Listening...' : '🔇 Ready to listen'}
+            {isListening ? 'Listening...' : '🔇 Ready to listen'}
           </p>
         </div>
 
@@ -509,7 +507,7 @@ const VoiceControl = ({ devices, onDeviceControl }) => {
                   : 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700'
               }`}
             >
-              {isListening ? '🎙️ Listening...' : '🎤 Start Listening'}
+              {isListening ? 'Listening...' : 'Start Listening'}
             </button>
             
             {isListening && (
@@ -527,7 +525,7 @@ const VoiceControl = ({ devices, onDeviceControl }) => {
               onClick={adjustVoiceSettings}
               className="py-2 px-4 rounded-lg font-medium bg-blue-500/20 text-blue-300 border border-blue-400/30 hover:bg-blue-500/30 transition-all"
             >
-              ⚙️ Voice Settings
+              Voice Settings
             </button>
             
             <button
@@ -538,14 +536,14 @@ const VoiceControl = ({ devices, onDeviceControl }) => {
                   : 'bg-purple-500/20 text-purple-300 border border-purple-400/30 hover:bg-purple-500/30'
               }`}
             >
-              {isContinuousMode ? '⏹️ Stop Continuous' : '🔄 Continuous Mode'}
+              {isContinuousMode ? 'Stop Continuous' : 'Continuous Mode'}
             </button>
             
             <button
               onClick={() => speakResponse('Voice control system is ready. You can control lights, check time, or ask for help.')}
               className="py-2 px-4 rounded-lg font-medium bg-green-500/20 text-green-300 border border-green-400/30 hover:bg-green-500/30 transition-all"
             >
-              🔊 Test Voice
+              Test Voice
             </button>
           </div>
         </div>

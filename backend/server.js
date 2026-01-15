@@ -118,7 +118,6 @@ app.get('/api/dashboard/stats', async (req, res) => {
         
         res.json({ success: true, data: stats });
     } catch (error) {
-        console.log('SmartAssist backend not available, using mock data');
         res.json({ 
             success: true, 
             data: { devices: 4, onlineDevices: 4, alerts: 0, energy: 92, temperature: 23 }
@@ -131,7 +130,6 @@ app.get('/api/devices', async (req, res) => {
         const response = await axios.get(`${SMARTASSIST_API}/devices`);
         res.json(response.data);
     } catch (error) {
-        console.log('SmartAssist backend not available');
         res.json({ 
             success: true, 
             data: [
@@ -149,7 +147,6 @@ app.post('/api/devices/:id/control', async (req, res) => {
         const response = await axios.put(`${SMARTASSIST_API}/devices/${req.params.id}/control`, req.body);
         res.json(response.data);
     } catch (error) {
-        console.log('SmartAssist backend not available');
         res.json({ success: true, message: 'Device control simulated' });
     }
 });
@@ -159,7 +156,6 @@ app.get('/api/alerts', async (req, res) => {
         const response = await axios.get(`${SMARTASSIST_API}/alerts`);
         res.json(response.data);
     } catch (error) {
-        console.log('SmartAssist backend not available');
         res.json({ success: true, data: [] });
     }
 });
@@ -173,7 +169,6 @@ let accessibilitySettings = {
 };
 
 app.get('/api/accessibility/settings', (req, res) => {
-    console.log('🌟 Accessibility settings requested:', accessibilitySettings);
     res.json({ success: true, data: accessibilitySettings });
 });
 
@@ -199,11 +194,11 @@ app.post('/api/accessibility/settings', (req, res) => {
         if (previousSettings[key] !== accessibilitySettings[key]) {
             const status = accessibilitySettings[key] ? 'ENABLED' : 'DISABLED';
             const emoji = {
-                highContrast: '🔆',
-                largeText: '🔍', 
-                screenReader: '🔊',
-                vibrationAlerts: '📳'
-            }[key] || '⚙️';
+                highContrast: '',
+                largeText: '', 
+                screenReader: '',
+                vibrationAlerts: ''
+            }[key] || '';
             
             const description = {
                 highContrast: 'High Contrast Mode',
@@ -212,7 +207,7 @@ app.post('/api/accessibility/settings', (req, res) => {
                 vibrationAlerts: 'Vibration Alerts'
             }[key] || key;
             
-            console.log(`${emoji} ${description}: ${status}`);
+            console.log(`${description}: ${status}`);
             changes.push(`${description} ${status.toLowerCase()}`);
         }
     });
@@ -223,12 +218,11 @@ app.post('/api/accessibility/settings', (req, res) => {
         const path = require('path');
         const settingsPath = path.join(__dirname, 'accessibility-settings.json');
         fs.writeFileSync(settingsPath, JSON.stringify(accessibilitySettings, null, 2));
-        console.log('💾 Accessibility settings saved to file');
     } catch (error) {
-        console.error('❌ Failed to save accessibility settings:', error.message);
+        console.error('Failed to save accessibility settings:', error.message);
     }
     
-    console.log('🌟 Complete accessibility settings:', accessibilitySettings);
+    console.log('Complete accessibility settings:', accessibilitySettings);
     
     const message = changes.length > 0 
         ? `Accessibility updated: ${changes.join(', ')}` 
@@ -252,7 +246,6 @@ app.get('/api/accessibility/load', (req, res) => {
         if (fs.existsSync(settingsPath)) {
             const savedSettings = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
             accessibilitySettings = { ...accessibilitySettings, ...savedSettings };
-            console.log('💾 Accessibility settings loaded from file:', accessibilitySettings);
         }
         
         res.json({ success: true, data: accessibilitySettings });
@@ -273,8 +266,6 @@ app.post('/api/accessibility/reset', (req, res) => {
     
     accessibilitySettings = defaultSettings;
     
-    console.log('🔄 Accessibility settings reset to defaults');
-    
     res.json({ 
         success: true, 
         data: accessibilitySettings,
@@ -285,7 +276,6 @@ app.post('/api/accessibility/reset', (req, res) => {
 // Voice control endpoints
 app.post('/api/voice/process', async (req, res) => {
     const { command } = req.body;
-    console.log('🎤 Voice command received:', command);
     
     try {
         // Forward to SmartAssist backend if available
@@ -293,7 +283,6 @@ app.post('/api/voice/process', async (req, res) => {
         res.json(response.data);
     } catch (error) {
         // Handle locally if SmartAssist not available
-        console.log('Processing voice command locally');
         res.json({ 
             success: true, 
             message: `Voice command "${command}" processed successfully`,
@@ -312,7 +301,6 @@ app.post('/api/voice/simulate', (req, res) => {
     ];
     const randomCommand = commands[Math.floor(Math.random() * commands.length)];
     
-    console.log('🎤 Simulated voice command:', randomCommand);
     res.json({ 
         success: true, 
         message: `Simulated: "${randomCommand}"`,
@@ -362,9 +350,8 @@ app.post('/api/gesture/devices', (req, res) => {
     // Enhanced logging with gesture details
     const gestureInfo = fingerCount ? `${fingerCount} finger(s)` : gestureType || 'gesture';
     const action = status ? 'ON' : 'OFF';
-    const emoji = status ? '💡' : '🔌';
     
-    console.log(`👋 ${emoji} Gesture Control [${gestureInfo}]: ${gestureDevices[deviceId].name} ${action}`);
+    console.log(`Gesture Control [${gestureInfo}]: ${gestureDevices[deviceId].name} ${action}`);
     
     // Update gesture statistics
     gestureSettings.lastGesture = {
@@ -400,9 +387,8 @@ app.post('/api/gesture/devices/:id/toggle', (req, res) => {
     
     const gestureInfo = fingerCount ? `${fingerCount} finger(s)` : gestureType || 'gesture';
     const action = newStatus ? 'ON' : 'OFF';
-    const emoji = newStatus ? '💡' : '🔌';
     
-    console.log(`👋 ${emoji} Toggle [${gestureInfo}]: ${gestureDevices[deviceId].name} ${action}`);
+    console.log(`Toggle [${gestureInfo}]: ${gestureDevices[deviceId].name} ${action}`);
     
     gestureSettings.lastGesture = {
         deviceId,
@@ -449,8 +435,6 @@ app.post('/api/gesture/settings', (req, res) => {
     if (detectionRange !== undefined) gestureSettings.detectionRange = detectionRange;
     if (responseDelay !== undefined) gestureSettings.responseDelay = responseDelay;
     
-    console.log('👋 Gesture settings updated:', gestureSettings);
-    
     res.json({ 
         success: true, 
         settings: gestureSettings,
@@ -487,8 +471,6 @@ app.post('/api/gesture/reset', (req, res) => {
         gestureDevices[deviceId].lastUpdated = Date.now();
     });
     
-    console.log('👋 🔄 All gesture devices reset to OFF');
-    
     res.json({ 
         success: true, 
         message: 'All devices reset to OFF',
@@ -500,21 +482,12 @@ app.post('/api/gesture/reset', (req, res) => {
 app.post('/api/gesture/process', async (req, res) => {
     const { gestureType, deviceId, fingerCount, confidence, landmarks, timestamp } = req.body;
     
-    console.log(`👋 Gesture Processing:`, {
-        type: gestureType,
-        device: deviceId,
-        fingers: fingerCount,
-        confidence: confidence || 'N/A',
-        time: new Date(timestamp || Date.now()).toLocaleTimeString()
-    });
-    
     try {
         // Forward to SmartAssist backend if available
         const response = await axios.post(`${SMARTASSIST_API}/gesture/process`, req.body);
         res.json(response.data);
     } catch (error) {
         // Handle locally if SmartAssist not available
-        console.log('📱 Processing gesture locally with enhanced detection');
         
         // Check if gesture system is enabled
         if (!gestureSettings.enabled) {
@@ -1145,36 +1118,36 @@ app.post('/api/communication/quick-phrase', (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`🔧 CareConnect Backend API running at http://localhost:${PORT}`);
-    console.log('📱 Frontend should connect to this backend');
-    console.log('🌐 Available endpoints:');
-    console.log('   • GET  /api/devices - Device list');
-    console.log('   • POST /api/devices/:id/control - Device control');
-    console.log('   • GET  /api/dashboard/stats - Dashboard data');
-    console.log('   • GET  /api/accessibility/settings - Get accessibility settings');
-    console.log('   • POST /api/accessibility/settings - Update accessibility settings');
-    console.log('   • GET  /api/accessibility/load - Load saved accessibility settings');
-    console.log('   • POST /api/accessibility/reset - Reset accessibility to defaults');
-    console.log('   • POST /api/voice/process - Voice commands');
-    console.log('   • GET  /api/gesture/devices - Gesture devices');
-    console.log('   • POST /api/gesture/devices - Update gesture device');
-    console.log('   • POST /api/gesture/devices/:id/toggle - Toggle specific device');
-    console.log('   • GET  /api/gesture/settings - Gesture system settings');
-    console.log('   • POST /api/gesture/settings - Update gesture settings');
-    console.log('   • GET  /api/gesture/health - Gesture system health');
-    console.log('   • POST /api/gesture/reset - Reset all devices');
-    console.log('   • GET  /gesture-control - Gesture Control Interface');
-    console.log('   • POST /api/gesture/process - Process gesture detection');
-    console.log('   • POST /api/gesture/simulate - Simulate gesture for testing');
-    console.log('   • GET  /api/gesture/commands - Available gesture commands');
-    console.log('   • POST /api/gesture/commands - Create gesture command');
-    console.log('   • PUT  /api/gesture/commands/:id - Update gesture command');
-    console.log('   • DELETE /api/gesture/commands/:id - Delete gesture command');
-    console.log('   • GET  /api/gesture/presets - Accessibility gesture presets');
-    console.log('   • POST /api/gesture/presets/apply - Apply gesture preset');
-    console.log('   • GET  /api/security/status - Security system');
-    console.log('   • POST /api/emergency/trigger - Emergency alerts');
-    console.log('   • POST /api/communication/* - Communication tools');
+    console.log(`CareConnect Backend API running at http://localhost:${PORT}`);
+    console.log('Frontend should connect to this backend');
+    console.log('Available endpoints:');
+    console.log('   - GET  /api/devices - Device list');
+    console.log('   - POST /api/devices/:id/control - Device control');
+    console.log('   - GET  /api/dashboard/stats - Dashboard data');
+    console.log('   - GET  /api/accessibility/settings - Get accessibility settings');
+    console.log('   - POST /api/accessibility/settings - Update accessibility settings');
+    console.log('   - GET  /api/accessibility/load - Load saved accessibility settings');
+    console.log('   - POST /api/accessibility/reset - Reset accessibility to defaults');
+    console.log('   - POST /api/voice/process - Voice commands');
+    console.log('   - GET  /api/gesture/devices - Gesture devices');
+    console.log('   - POST /api/gesture/devices - Update gesture device');
+    console.log('   - POST /api/gesture/devices/:id/toggle - Toggle specific device');
+    console.log('   - GET  /api/gesture/settings - Gesture system settings');
+    console.log('   - POST /api/gesture/settings - Update gesture settings');
+    console.log('   - GET  /api/gesture/health - Gesture system health');
+    console.log('   - POST /api/gesture/reset - Reset all devices');
+    console.log('   - GET  /gesture-control - Gesture Control Interface');
+    console.log('   - POST /api/gesture/process - Process gesture detection');
+    console.log('   - POST /api/gesture/simulate - Simulate gesture for testing');
+    console.log('   - GET  /api/gesture/commands - Available gesture commands');
+    console.log('   - POST /api/gesture/commands - Create gesture command');
+    console.log('   - PUT  /api/gesture/commands/:id - Update gesture command');
+    console.log('   - DELETE /api/gesture/commands/:id - Delete gesture command');
+    console.log('   - GET  /api/gesture/presets - Accessibility gesture presets');
+    console.log('   - POST /api/gesture/presets/apply - Apply gesture preset');
+    console.log('   - GET  /api/security/status - Security system');
+    console.log('   - POST /api/emergency/trigger - Emergency alerts');
+    console.log('   - POST /api/communication/* - Communication tools');
     
     // Load accessibility settings on startup
     try {
@@ -1185,11 +1158,11 @@ app.listen(PORT, () => {
         if (fs.existsSync(settingsPath)) {
             const savedSettings = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
             accessibilitySettings = { ...accessibilitySettings, ...savedSettings };
-            console.log('🌟 Accessibility settings loaded on startup:', accessibilitySettings);
+            console.log('Accessibility settings loaded on startup:', accessibilitySettings);
         } else {
-            console.log('🌟 Using default accessibility settings:', accessibilitySettings);
+            console.log('Using default accessibility settings:', accessibilitySettings);
         }
     } catch (error) {
-        console.error('❌ Failed to load accessibility settings on startup:', error.message);
+        console.error('Failed to load accessibility settings on startup:', error.message);
     }
 });

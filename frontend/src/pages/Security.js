@@ -146,7 +146,7 @@ const Security = () => {
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center space-x-4">
               <div className="w-16 h-16 bg-gradient-to-r from-red-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg">
-                <span className="text-3xl">🔒</span>
+                <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M9,11.75A1.25,1.25 0 0,0 7.75,13A1.25,1.25 0 0,0 9,14.25A1.25,1.25 0 0,0 10.25,13A1.25,1.25 0 0,0 9,11.75M15,11.75A1.25,1.25 0 0,0 13.75,13A1.25,1.25 0 0,0 15,14.25A1.25,1.25 0 0,0 16.25,13A1.25,1.25 0 0,0 15,11.75M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,20C7.59,20 4,16.41 4,12C4,11.71 4,11.42 4.05,11.14C6.41,10.09 8.28,8.16 9.26,5.77C11.07,8.33 14.05,10 17.42,10C18.2,10 18.95,9.91 19.67,9.74C19.88,10.45 20,11.21 20,12C20,16.41 16.41,20 12,20Z"/></svg>
               </div>
               <div>
                 <h1 className="text-3xl font-bold text-white mb-1">Face Recognition Security</h1>
@@ -175,7 +175,6 @@ const Security = () => {
                 className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-6 py-3 rounded-xl font-medium hover:scale-105 transition-all shadow-lg disabled:opacity-50"
               >
                 <div className="flex items-center space-x-2">
-                  <span>📷</span>
                   <span>{isRegistering ? 'Registering...' : 'Register Face'}</span>
                 </div>
               </button>
@@ -188,7 +187,6 @@ const Security = () => {
                 }`}
               >
                 <div className="flex items-center space-x-2">
-                  <span>🔍</span>
                   <span>{isSecurityActive ? 'Stop Security' : 'Start Security'}</span>
                 </div>
               </button>
@@ -257,7 +255,6 @@ const Security = () => {
                 className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-300 px-4 py-2 rounded-xl border border-green-400/30 hover:bg-green-500/30 transition-all"
               >
                 <div className="flex items-center space-x-2">
-                  <span>📥</span>
                   <span>Download CSV</span>
                 </div>
               </button>
@@ -266,7 +263,6 @@ const Security = () => {
                 className="bg-gradient-to-r from-red-500/20 to-pink-500/20 text-red-300 px-4 py-2 rounded-xl border border-red-400/30 hover:bg-red-500/30 transition-all"
               >
                 <div className="flex items-center space-x-2">
-                  <span>🗑️</span>
                   <span>Clear Logs</span>
                 </div>
               </button>

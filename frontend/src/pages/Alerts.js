@@ -69,7 +69,7 @@ const Alerts = () => {
           </div>
           <Link to="/dashboard" className="bg-white/20 border border-white/30 text-white px-6 py-3 rounded-xl hover:bg-white/30 transition-all backdrop-blur-sm flex items-center space-x-2">
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
-            <span>Back</span>
+            <span>Back to Dashboard</span>
           </Link>
         </div>
       </div>
