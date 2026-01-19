@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAccessibility } from '../context/AccessibilityContext';
 import api, { deviceAPI, dashboardAPI } from '../services/api';
 import { database } from '../firebase/config';
-import { ref, set, onValue, off } from 'firebase/database';
+import { ref, set, onValue, off, get } from 'firebase/database';
 import io from 'socket.io-client';
 import VoiceControl from '../components/VoiceControl';
 import GlobalAccessibility from '../components/GlobalAccessibility';
@@ -24,12 +24,7 @@ const DeviceControl = () => {
   const [gasStatus, setGasStatus] = useState(0);
   const [temperatureStatus, setTemperatureStatus] = useState('NORMAL');
   const [pirData, setPirData] = useState({});
-  const [motionHistory, setMotionHistory] = useState([
-    { count: 0, location: 'bedroom', timestamp: '2024-01-15T10:40:15Z' },
-    { count: 0, location: 'living_room', timestamp: '2024-01-15T10:45:30Z' },
-    { count: 2, location: 'Living Room', timestamp: '10:31:42 AM' },
-    { count: 2, location: 'Living Room', timestamp: '10:31:44 AM' }
-  ]);
+  const [motionHistory, setMotionHistory] = useState([]);
   
   const [currentLEDStates, setCurrentLEDStates] = useState({ LED1: 0, LED2: 0, LED3: 0, LED4: 0 });
 
@@ -67,25 +62,9 @@ const DeviceControl = () => {
     };
     
     document.addEventListener('keydown', handleKeyPress);
-    
-    // Simulate motion detection updates
-    const motionInterval = setInterval(() => {
-      const locations = ['Living Room', 'Bedroom', 'Kitchen', 'Bathroom'];
-      const randomLocation = locations[Math.floor(Math.random() * locations.length)];
-      const randomCount = Math.floor(Math.random() * 3);
-      
-      const newMotion = {
-        count: randomCount,
-        location: randomLocation,
-        timestamp: new Date().toLocaleTimeString()
-      };
-      
-      setMotionHistory(prev => [newMotion, ...prev.slice(0, 9)]); // Keep last 10 entries
-    }, 30000); // Update every 30 seconds
 
     return () => {
       newSocket.disconnect();
-      clearInterval(motionInterval);
       document.removeEventListener('keydown', handleKeyPress);
       // Clean up Firebase listeners
       cleanupFirebaseListeners();
@@ -259,60 +238,41 @@ const DeviceControl = () => {
       const device = devices.find(d => d._id === deviceId);
       if (!device) return;
       
-      // Control via Firebase
+      console.log(`🔥 Attempting Firebase write: ${device.firebaseKey} = ${action === 'on' ? 1 : 0}`);
+      
+      // Control via Firebase with error handling
       if (device.firebaseKey) {
         const ledRef = ref(database, device.firebaseKey);
-        await set(ledRef, action === 'on' ? 1 : 0);
+        const newValue = action === 'on' ? 1 : 0;
         
-        console.log(`✅ Firebase: ${device.firebaseKey} set to ${action === 'on' ? 1 : 0}`);
+        await set(ledRef, newValue);
+        console.log(`✅ Firebase SUCCESS: ${device.firebaseKey} set to ${newValue}`);
+        
+        // Verify the write
+        setTimeout(async () => {
+          const snapshot = await get(ledRef);
+          console.log(`🔍 Firebase verification: ${device.firebaseKey} = ${snapshot.val()}`);
+        }, 1000);
       }
       
-      // Update local state immediately for better UX
+      // Update local state
       setDevices(prev => prev.map(d => 
         d._id === deviceId ? { ...d, status: action === 'on', state: action, lastActivity: new Date() } : d
       ));
       
-      // Enhanced audio feedback with screen reader support
+      // Audio feedback
       const deviceName = device.name || 'Device';
       announceToScreenReader(`${deviceName} turned ${action}`);
       
-      // Vibration feedback for deaf users
       if (settings.vibrationAlerts && navigator.vibrate) {
         navigator.vibrate(action === 'on' ? [100, 50, 100] : [200]);
       }
       
-      // Update LED states for accessibility
-      if (device.firebaseKey) {
-        setCurrentLEDStates(prev => ({
-          ...prev,
-          [device.firebaseKey]: action === 'on' ? 1 : 0
-        }));
-      }
-      
-      // Add to motion history for activity tracking
-      const newMotion = {
-        count: 1,
-        location: deviceName,
-        timestamp: new Date().toLocaleTimeString(),
-        action: `${deviceName} ${action.toUpperCase()}`
-      };
-      setMotionHistory(prev => [newMotion, ...prev.slice(0, 9)]);
-      
       console.log(`✅ ${deviceName} turned ${action.toUpperCase()}`);
       
     } catch (error) {
-      console.error('Error controlling device:', error);
-      
-      // Fallback to API if Firebase fails
-      try {
-        const response = await deviceAPI.control(deviceId, {
-          action,
-          device_type: deviceType
-        });
-        console.log('Fallback API call successful');
-      } catch (apiError) {
-        console.error('Both Firebase and API failed:', apiError);
-      }
+      console.error('❌ Firebase Error:', error);
+      alert(`Firebase Error: ${error.message}`);
     }
   };
   

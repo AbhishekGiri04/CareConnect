@@ -1,0 +1,109 @@
+{
+  "LED1": 0,
+  "LED2": 0,
+  "LED3": 0,
+  "LED4": 0,
+  "GASLEAK": 0,
+  "TEMPERATURE": {
+    "living_room": {
+      "value": 23,
+      "unit": "celsius",
+      "timestamp": 1704067200000
+    },
+    "bedroom": {
+      "value": 22,
+      "unit": "celsius",
+      "timestamp": 1704067200000
+    },
+    "kitchen": {
+      "value": 25,
+      "unit": "celsius",
+      "timestamp": 1704067200000
+    }
+  },
+  "PIR_SENSORS": {
+    "PIR_1": {
+      "location": "Living Room",
+      "people_count": 0,
+      "motion_detected": false,
+      "timestamp": 1704067200000
+    },
+    "PIR_2": {
+      "location": "Bedroom",
+      "people_count": 0,
+      "motion_detected": false,
+      "timestamp": 1704067200000
+    },
+    "PIR_3": {
+      "location": "Kitchen",
+      "people_count": 0,
+      "motion_detected": false,
+      "timestamp": 1704067200000
+    }
+  },
+  "DEVICES": {
+    "device_1": {
+      "id": "1",
+      "name": "Living Room Light",
+      "type": "light",
+      "status": false,
+      "location": "Living Room",
+      "online": true,
+      "firebaseKey": "LED1"
+    },
+    "device_2": {
+      "id": "2",
+      "name": "Bedroom Fan",
+      "type": "fan",
+      "status": false,
+      "location": "Bedroom",
+      "online": true,
+      "firebaseKey": "LED2"
+    },
+    "device_3": {
+      "id": "3",
+      "name": "Kitchen Light",
+      "type": "light",
+      "status": false,
+      "location": "Kitchen",
+      "online": true,
+      "firebaseKey": "LED3"
+    },
+    "device_4": {
+      "id": "4",
+      "name": "Motion Sensor",
+      "type": "sensor",
+      "status": false,
+      "location": "Bathroom",
+      "online": true,
+      "firebaseKey": "LED4"
+    }
+  },
+  "EMERGENCY": {
+    "panic": false,
+    "timestamp": null
+  },
+  "USERS": {
+    "user_1": {
+      "name": "Abhishek Giri",
+      "email": "abhishekgiri1978@gmail.com",
+      "role": "admin",
+      "disability": {
+        "type": "mobility",
+        "level": "moderate"
+      }
+    }
+  },
+  "ACCESSIBILITY_SETTINGS": {
+    "highContrast": false,
+    "largeText": false,
+    "screenReader": false,
+    "vibrationAlerts": true
+  },
+  "GESTURE_SETTINGS": {
+    "enabled": false,
+    "sensitivity": 0.7,
+    "detectionRange": "medium",
+    "responseDelay": 0
+  }
+}

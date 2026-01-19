@@ -14,12 +14,19 @@
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "express-session": "^1.17.3",
-    "firebase-admin": "^11.11.0"
+    "firebase-admin": "^11.11.0",
+    "nodemailer": "^7.0.12"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
   },
-  "keywords": ["careconnect", "backend", "accessibility", "gesture-control", "firebase"],
+  "keywords": [
+    "careconnect",
+    "backend",
+    "accessibility",
+    "gesture-control",
+    "firebase"
+  ],
   "author": "CareConnect Team",
   "license": "MIT"
 }

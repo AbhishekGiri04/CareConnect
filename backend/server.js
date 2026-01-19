@@ -4,10 +4,20 @@ const path = require('path');
 const cors = require('cors');
 const axios = require('axios');
 const fs = require('fs');
+const nodemailer = require('nodemailer');
 require('dotenv').config();
 
 const app = express();
 const PORT = 3001;
+
+// Email transporter setup
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: 'abhishekgiri1978@gmail.com',
+        pass: 'kytasopwdbrgrzou'
+    }
+});
 
 // Middleware
 app.use(cors());
@@ -1050,14 +1060,40 @@ app.delete('/api/security/logs', (req, res) => {
 });
 
 // Emergency endpoints
-app.post('/api/emergency/trigger', (req, res) => {
-    const { type, location } = req.body;
+app.post('/api/emergency/trigger', async (req, res) => {
+    const { type, location, email } = req.body;
     console.log(`🚨 Emergency alert triggered: ${type} at ${location}`);
+    
+    // Send email notification
+    if (email) {
+        try {
+            const mailOptions = {
+                from: 'abhishekgiri1978@gmail.com',
+                to: email,
+                subject: `🚨 EMERGENCY ALERT - ${type.toUpperCase()}`,
+                html: `
+                    <h2 style="color: red;">🚨 EMERGENCY ALERT ACTIVATED</h2>
+                    <p><strong>Type:</strong> ${type}</p>
+                    <p><strong>Location:</strong> ${location}</p>
+                    <p><strong>Time:</strong> ${new Date().toLocaleString()}</p>
+                    <p><strong>Status:</strong> All lights have been turned on automatically</p>
+                    <hr>
+                    <p><em>This is an automated emergency notification from CareConnect.</em></p>
+                `
+            };
+            
+            await transporter.sendMail(mailOptions);
+            console.log(`✅ Emergency email sent to: ${email}`);
+            
+        } catch (emailError) {
+            console.error('❌ Email failed:', emailError.message);
+        }
+    }
     
     res.json({ 
         success: true, 
         message: `${type} emergency alert activated`,
-        data: { type, location, timestamp: new Date().toISOString() }
+        data: { type, location, timestamp: new Date().toISOString(), emailSent: !!email }
     });
 });
 

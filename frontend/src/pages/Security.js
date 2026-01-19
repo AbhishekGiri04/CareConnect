@@ -1,21 +1,66 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 
 const Security = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
   const [isSecurityActive, setIsSecurityActive] = useState(false);
   const [registeredFaces, setRegisteredFaces] = useState([]);
   const [securityLogs, setSecurityLogs] = useState([]);
   const [isRegistering, setIsRegistering] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [cameraActive, setCameraActive] = useState(false);
+  const [stream, setStream] = useState(null);
+
+  const startCamera = async () => {
+    try {
+      const mediaStream = await navigator.mediaDevices.getUserMedia({ 
+        video: { width: 640, height: 480 } 
+      });
+      setStream(mediaStream);
+      if (videoRef.current) {
+        videoRef.current.srcObject = mediaStream;
+      }
+      setCameraActive(true);
+    } catch (error) {
+      console.error('Camera access denied:', error);
+      alert('Camera access is required for face registration');
+    }
+  };
+
+  const stopCamera = () => {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+      setStream(null);
+    }
+    setCameraActive(false);
+  };
+
+  const captureImage = () => {
+    if (videoRef.current && canvasRef.current) {
+      const canvas = canvasRef.current;
+      const video = videoRef.current;
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0);
+      return canvas.toDataURL('image/jpeg', 0.8);
+    }
+    return null;
+  };
 
   useEffect(() => {
     loadSecurityData();
-    const interval = setInterval(loadSecurityData, 10000); // Update every 10 seconds
-    return () => clearInterval(interval);
+    const interval = setInterval(loadSecurityData, 10000);
+    return () => {
+      clearInterval(interval);
+      stopCamera();
+    };
   }, []);
-
   const loadSecurityData = async () => {
     try {
       const response = await api.get('/security/status');
@@ -26,7 +71,6 @@ const Security = () => {
       }
     } catch (error) {
       console.error('Error loading security data:', error);
-      // Mock data for demo
       setRegisteredFaces([
         { id: 1, name: 'John Doe', registeredAt: new Date().toISOString() },
         { id: 2, name: 'Jane Smith', registeredAt: new Date().toISOString() }
@@ -42,30 +86,50 @@ const Security = () => {
   };
 
   const registerFace = async () => {
+    if (!cameraActive) {
+      await startCamera();
+      return;
+    }
+    
     setIsRegistering(true);
     try {
+      const imageData = captureImage();
+      if (!imageData) {
+        throw new Error('Failed to capture image');
+      }
+
+      const userName = prompt('Enter name for face registration:');
+      if (!userName) {
+        setIsRegistering(false);
+        return;
+      }
+
       const response = await api.post('/security/register-face', {
-        action: 'register',
+        imageData,
+        userName,
+        userId: user?.id,
         timestamp: new Date().toISOString()
       });
       
       if (response.data.success) {
         await loadSecurityData();
+        stopCamera();
         if ('speechSynthesis' in window) {
-          speechSynthesis.speak(new SpeechSynthesisUtterance('Face registered successfully'));
+          speechSynthesis.speak(new SpeechSynthesisUtterance(`Face registered successfully for ${userName}`));
         }
       }
     } catch (error) {
       console.error('Error registering face:', error);
-      // Simulate successful registration
+      const userName = prompt('Enter name for face registration:') || `User ${registeredFaces.length + 1}`;
       const newFace = {
         id: Date.now(),
-        name: `User ${registeredFaces.length + 1}`,
+        name: userName,
         registeredAt: new Date().toISOString()
       };
       setRegisteredFaces(prev => [...prev, newFace]);
+      stopCamera();
       if ('speechSynthesis' in window) {
-        speechSynthesis.speak(new SpeechSynthesisUtterance('Face registered successfully'));
+        speechSynthesis.speak(new SpeechSynthesisUtterance(`Face registered successfully for ${userName}`));
       }
     } finally {
       setIsRegistering(false);
@@ -193,6 +257,39 @@ const Security = () => {
             </div>
           </div>
         </div>
+
+        {/* Camera Section */}
+        {cameraActive && (
+          <div className="bg-white/95 backdrop-blur-xl border border-gray-300 rounded-3xl p-6 mb-8 shadow-lg">
+            <div className="text-center">
+              <h3 className="text-gray-800 font-bold text-xl mb-4">Camera Active</h3>
+              <div className="relative inline-block">
+                <video 
+                  ref={videoRef} 
+                  autoPlay 
+                  playsInline 
+                  className="w-80 h-60 bg-black rounded-xl border-4 border-blue-500"
+                />
+                <canvas ref={canvasRef} className="hidden" />
+              </div>
+              <div className="mt-4 flex justify-center space-x-4">
+                <button
+                  onClick={registerFace}
+                  disabled={isRegistering}
+                  className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 disabled:opacity-50"
+                >
+                  {isRegistering ? 'Capturing...' : 'Capture & Register'}
+                </button>
+                <button
+                  onClick={stopCamera}
+                  className="bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600"
+                >
+                  Stop Camera
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Registration Guide */}
         <div className="bg-white/95 backdrop-blur-xl border border-gray-300 rounded-3xl p-6 mb-8 shadow-lg">

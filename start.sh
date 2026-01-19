@@ -5,7 +5,7 @@ echo "======================================"
 
 # Start Backend
 echo "Starting Backend (Port 3001)..."
-cd /Users/abhishekgiri/Downloads/GITHUB_PROJECTS/IOT/CareConnect/backend
+cd /Users/abhishekgiri/Downloads/GITHUB_PROJECTS/CareConnect/backend
 npm start &
 BACKEND_PID=$!
 
@@ -14,7 +14,7 @@ sleep 5
 
 # Start Frontend
 echo "Starting Frontend (Port 3002)..."
-cd /Users/abhishekgiri/Downloads/GITHUB_PROJECTS/IOT/CareConnect/frontend
+cd /Users/abhishekgiri/Downloads/GITHUB_PROJECTS/CareConnect/frontend
 npm start &
 FRONTEND_PID=$!
 

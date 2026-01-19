@@ -12,7 +12,7 @@ const Dashboard = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [stats, setStats] = useState({ devices: 4, alerts: 0, energy: 92, temperature: 72, batteryLevel: null });
+  const [stats, setStats] = useState({ devices: 4, alerts: 0, energy: 0, temperature: 72, batteryLevel: 0 });
   const [recentActivity, setRecentActivity] = useState([
     { id: 1, type: 'device', action: 'Living Room Light turned ON', time: '2 minutes ago' },
     { id: 2, type: 'voice', action: 'Voice command: "Turn on kitchen light"', time: '5 minutes ago' },
@@ -45,7 +45,7 @@ const Dashboard = () => {
         if ('getBattery' in navigator) {
           const battery = await navigator.getBattery();
           const batteryPercent = Math.round(battery.level * 100);
-          console.log(`🔋 Battery Level: ${batteryPercent}%`);
+          console.log(`🔋 Battery Level Fetched: ${batteryPercent}%`);
           
           setStats(prev => ({ ...prev, energy: batteryPercent, batteryLevel: batteryPercent }));
           
@@ -56,10 +56,12 @@ const Dashboard = () => {
             setStats(prev => ({ ...prev, energy: newBatteryPercent, batteryLevel: newBatteryPercent }));
           });
         } else {
-          console.log('❌ Battery API not supported');
+          console.log('❌ Battery API not supported - Using fallback');
+          setStats(prev => ({ ...prev, energy: 85, batteryLevel: 85 }));
         }
       } catch (error) {
         console.log('❌ Battery API error:', error);
+        setStats(prev => ({ ...prev, energy: 85, batteryLevel: 85 }));
       }
     };
     
