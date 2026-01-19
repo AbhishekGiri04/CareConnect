@@ -363,7 +363,7 @@ const GestureControl = () => {
       <div 
         className="fixed inset-0 bg-cover bg-center bg-no-repeat"
         style={{
-          backgroundImage: 'url(https://w0.peakpx.com/wallpaper/562/780/HD-wallpaper-my-handprint-hand-print.jpg)'
+          backgroundImage: 'url(https://external-preview.redd.it/YDPypnLAWg-pbivGJsOrgnY0_ovthe3kVjCtSOoUdYY.jpg?auto=webp&s=d81fd1261889f9fec8b6497f54c7d506ee685998)'
         }}
       >
         <div className="absolute inset-0 bg-black/30"></div>

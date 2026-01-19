@@ -13,13 +13,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [stats, setStats] = useState({ devices: 4, alerts: 0, energy: 0, temperature: 72, batteryLevel: 0 });
-  const [recentActivity, setRecentActivity] = useState([
-    { id: 1, type: 'device', action: 'Living Room Light turned ON', time: '2 minutes ago' },
-    { id: 2, type: 'voice', action: 'Voice command: "Turn on kitchen light"', time: '5 minutes ago' },
-    { id: 3, type: 'gesture', action: 'Wave gesture detected - All lights OFF', time: '8 minutes ago' },
-    { id: 4, type: 'security', action: 'Face recognition: John Doe authorized', time: '12 minutes ago' },
-    { id: 5, type: 'device', action: 'Bedroom Fan turned OFF', time: '15 minutes ago' }
-  ]);
+  const [recentActivity, setRecentActivity] = useState([]);
   const [devices, setDevices] = useState([]);
   const [healthData, setHealthData] = useState(null);
   const [socket, setSocket] = useState(null);
@@ -81,8 +75,8 @@ const Dashboard = () => {
           setStats(prev => ({
             ...prev,
             devices: backendStats.devices || 4,
-            alerts: backendStats.alerts || 0,
-            energy: backendStats.energy || 92
+            alerts: backendStats.alerts || 0
+            // Remove energy override to keep real battery level
           }));
           console.log('✅ Connected to SmartAssist backend:', backendStats);
         }
@@ -95,9 +89,22 @@ const Dashboard = () => {
           console.log('📱 Devices loaded:', deviceList.length);
         }
         
+        // Get real activity data from backend
+        const activityResponse = await api.get('/activity/recent');
+        if (activityResponse.data.success) {
+          const activities = activityResponse.data.data || [];
+          // Remove duplicates and set unique activities
+          const uniqueActivities = activities.filter((activity, index, self) => 
+            index === self.findIndex(a => a.action === activity.action && a.type === activity.type)
+          );
+          setRecentActivity(uniqueActivities);
+          console.log('📋 Real activity data loaded:', uniqueActivities.length, 'unique events');
+        }
+        
       } catch (error) {
         console.log('⚠️ SmartAssist backend not available, using default values:', error.message);
-        // Keep default values when backend is not available
+        // Add some initial activity when backend is not available
+        addActivity('device', 'System initialized - CareConnect started');
       }
     };
     
@@ -108,14 +115,92 @@ const Dashboard = () => {
   
   // Add activity when actions are performed
   const addActivity = (type, action) => {
+    // Check for duplicate activities (same action within last 5 seconds)
+    const now = Date.now();
+    const isDuplicate = recentActivity.some(activity => 
+      activity.action === action && 
+      activity.type === type && 
+      (now - new Date(activity.timestamp).getTime()) < 5000
+    );
+    
+    if (isDuplicate) {
+      console.log('🚫 Duplicate activity prevented:', action);
+      return;
+    }
+    
     const newActivity = {
       id: Date.now(),
       type: type,
       action: action,
-      time: 'Just now'
+      time: 'Just now',
+      timestamp: new Date().toISOString()
     };
     setRecentActivity(prev => [newActivity, ...prev.slice(0, 9)]); // Keep last 10 activities
+    
+    // Send to backend for persistence
+    try {
+      api.post('/activity/add', newActivity).catch(err => 
+        console.log('Activity logging failed:', err.message)
+      );
+    } catch (error) {
+      console.log('Failed to log activity:', error.message);
+    }
   };
+
+  // Socket connection for real-time updates
+  useEffect(() => {
+    const socketConnection = io('http://localhost:3001');
+    setSocket(socketConnection);
+    
+    // Listen for real-time activity updates
+    socketConnection.on('activity_update', (activity) => {
+      console.log('📡 Real-time activity received:', activity);
+      
+      // Check for duplicates before adding
+      setRecentActivity(prev => {
+        const isDuplicate = prev.some(existing => 
+          existing.action === activity.action && 
+          existing.type === activity.type &&
+          Math.abs(new Date(existing.timestamp).getTime() - new Date(activity.timestamp).getTime()) < 5000
+        );
+        
+        if (isDuplicate) {
+          console.log('🚫 Duplicate real-time activity prevented:', activity.action);
+          return prev;
+        }
+        
+        return [activity, ...prev.slice(0, 9)];
+      });
+    });
+    
+    // Listen for device status changes
+    socketConnection.on('device_status_change', (data) => {
+      console.log('🔌 Device status changed:', data);
+      addActivity('device', `${data.deviceName} turned ${data.status.toUpperCase()}`);
+    });
+    
+    // Listen for gesture events
+    socketConnection.on('gesture_detected', (data) => {
+      console.log('👋 Gesture detected:', data);
+      addActivity('gesture', `${data.gesture} gesture detected - ${data.action}`);
+    });
+    
+    // Listen for voice commands
+    socketConnection.on('voice_command', (data) => {
+      console.log('🎤 Voice command:', data);
+      addActivity('voice', `Voice command: "${data.command}" - ${data.response}`);
+    });
+    
+    // Listen for security events
+    socketConnection.on('security_event', (data) => {
+      console.log('🔒 Security event:', data);
+      addActivity('security', data.message);
+    });
+    
+    return () => {
+      socketConnection.disconnect();
+    };
+  }, []);
 
   // Load accessibility settings from backend
   useEffect(() => {
@@ -1121,13 +1206,15 @@ const Dashboard = () => {
                     activity.type === 'security' ? 'bg-red-500/20 border border-red-400/30' :
                     activity.type === 'voice' ? 'bg-purple-500/20 border border-purple-400/30' :
                     activity.type === 'gesture' ? 'bg-orange-500/20 border border-orange-400/30' :
-                    'bg-green-500/20 border border-green-400/30'
+                    activity.type === 'system' ? 'bg-green-500/20 border border-green-400/30' :
+                    'bg-gray-500/20 border border-gray-400/30'
                   }`}>
                     {activity.type === 'device' && <svg className="w-6 h-6 text-blue-400" fill="currentColor" viewBox="0 0 24 24"><path d="M4 6h18V4H4c-1.1 0-2 .9-2 2v11H0v3h14v-3H4V6zm19 2h-6c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h6c.55 0 1-.45 1-1V9c0-.55-.45-1-1-1zm-1 9h-4v-7h4v7z"/></svg>}
                     {activity.type === 'security' && <svg className="w-6 h-6 text-red-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12,17A2,2 0 0,0 14,15C14,13.89 13.1,13 12,13A2,2 0 0,0 10,15A2,2 0 0,0 12,17M18,8A2,2 0 0,1 20,10V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V10C4,8.89 4.9,8 6,8H7V6A5,5 0 0,1 12,1A5,5 0 0,1 17,6V8H18M12,3A3,3 0 0,0 9,6V8H15V6A3,3 0 0,0 12,3Z"/></svg>}
                     {activity.type === 'voice' && <svg className="w-6 h-6 text-purple-400" fill="currentColor" viewBox="0 0 24 24"><path d="M7.58 4.08L6.15 2.65C3.75 4.48 2.17 7.3 2.03 10.5h2c.15-2.65 1.51-4.97 3.55-6.42zm12.39 6.42h2c-.15-3.2-1.73-6.02-4.12-7.85l-1.42 1.43c2.02 1.45 3.39 3.77 3.54 6.42zM18 11c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2v-5zm-6 11c.14 0 .27-.01.4-.04.65-.14 1.18-.58 1.44-1.18.1-.24.15-.5.15-.78h-4c.01 1.1.9 2 2.01 2z"/></svg>}
                     {activity.type === 'gesture' && <svg className="w-6 h-6 text-orange-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12,2A2,2 0 0,1 14,4C14,4.74 13.6,5.39 13,5.73V7H14A7,7 0 0,1 21,14H22A1,1 0 0,1 23,15V18A1,1 0 0,1 22,19H21V20A2,2 0 0,1 19,22H5A2,2 0 0,1 3,20V19H2A1,1 0 0,1 1,18V15A1,1 0 0,1 2,14H3A7,7 0 0,1 10,7H11V5.73C10.4,5.39 10,4.74 10,4A2,2 0 0,1 12,2M7.5,13A2.5,2.5 0 0,0 5,15.5A2.5,2.5 0 0,0 7.5,18A2.5,2.5 0 0,0 10,15.5A2.5,2.5 0 0,0 7.5,13M16.5,13A2.5,2.5 0 0,0 14,15.5A2.5,2.5 0 0,0 16.5,18A2.5,2.5 0 0,0 19,15.5A2.5,2.5 0 0,0 16.5,13Z"/></svg>}
-                    {activity.type === 'climate' && <svg className="w-6 h-6 text-green-400" fill="currentColor" viewBox="0 0 24 24"><path d="M15 13V5c0-1.66-1.34-3-3-3S9 3.34 9 5v8c-1.21.91-2 2.37-2 4 0 2.76 2.24 5 5 5s5-2.24 5-5c0-1.63-.79-3.09-2-4zm-4-2V5c0-.55.45-1 1-1s1 .45 1 1v6h-2z"/></svg>}
+                    {activity.type === 'system' && <svg className="w-6 h-6 text-green-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,11.67 19.47,11.34 19.43,11L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.96 19.05,5.05L16.56,6.05C16.04,5.66 15.5,5.32 14.87,5.07L14.5,2.42C14.46,2.18 14.25,2 14,2H10C9.75,2 9.54,2.18 9.5,2.42L9.13,5.07C8.5,5.32 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.96 4.46,5.05 4.34,5.27L2.34,8.73C2.21,8.95 2.27,9.22 2.46,9.37L4.57,11C4.53,11.34 4.5,11.67 4.5,12C4.5,12.33 4.53,12.65 4.57,12.97L2.46,14.63C2.27,14.78 2.21,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.03 4.95,18.95L7.44,17.94C7.96,18.34 8.5,18.68 9.13,18.93L9.5,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,21.82 14.5,21.58L14.87,18.93C15.5,18.67 16.04,18.34 16.56,17.94L19.05,18.95C19.27,19.03 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.97Z"/></svg>}
+                    {!['device', 'security', 'voice', 'gesture', 'system'].includes(activity.type) && <svg className="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>}
                   </div>
                   <div className="flex-1">
                     <p className="text-white font-medium">{activity.action}</p>
@@ -1137,7 +1224,8 @@ const Dashboard = () => {
                         activity.type === 'security' ? 'bg-red-500/20 text-red-300' :
                         activity.type === 'voice' ? 'bg-purple-500/20 text-purple-300' :
                         activity.type === 'gesture' ? 'bg-orange-500/20 text-orange-300' :
-                        'bg-green-500/20 text-green-300'
+                        activity.type === 'system' ? 'bg-green-500/20 text-green-300' :
+                        'bg-gray-500/20 text-gray-300'
                       }`}>
                         {activity.type.charAt(0).toUpperCase() + activity.type.slice(1)}
                       </span>
@@ -1150,7 +1238,8 @@ const Dashboard = () => {
                   activity.type === 'security' ? 'bg-red-400' :
                   activity.type === 'voice' ? 'bg-purple-400' :
                   activity.type === 'gesture' ? 'bg-orange-400' :
-                  'bg-green-400'
+                  activity.type === 'system' ? 'bg-green-400' :
+                  'bg-gray-400'
                 }`}></div>
               </div>
             </div>

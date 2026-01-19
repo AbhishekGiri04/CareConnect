@@ -1,23 +1,160 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import api from '../services/api';
 
 const DeviceSetup = () => {
   const [scanning, setScanning] = useState(false);
-  const [availableDevices] = useState([
-    { id: 1, name: 'ESP32-Light-01', type: 'Light Controller', status: 'available', signal: 85 },
-    { id: 2, name: 'ESP32-Fan-01', type: 'Fan Controller', status: 'available', signal: 92 },
-    { id: 3, name: 'NodeMCU-Sensor-01', type: 'Motion Sensor', status: 'available', signal: 78 },
-    { id: 4, name: 'ESP32-Band-01', type: 'Health Monitor', status: 'paired', signal: 95 }
-  ]);
+  const [availableDevices, setAvailableDevices] = useState([]);
+  const [connectedDevices, setConnectedDevices] = useState([]);
+  const [networkStatus, setNetworkStatus] = useState({
+    wifi: { connected: false, ssid: '', signal: 0 },
+    mqtt: { connected: false, broker: '' },
+    cloudSync: { active: false, lastSync: null }
+  });
+  const [loading, setLoading] = useState(true);
 
-  const [connectedDevices] = useState([
-    { id: 1, name: 'Living Room Light', type: 'ESP32', status: 'online', battery: 100 },
-    { id: 2, name: 'Bedroom Fan', type: 'NodeMCU', status: 'online', battery: 87 },
-    { id: 3, name: 'Smart Band', type: 'ESP32', status: 'online', battery: 65 }
-  ]);
+  useEffect(() => {
+    fetchDeviceData();
+    fetchNetworkStatus();
+    const interval = setInterval(() => {
+      fetchDeviceData();
+      fetchNetworkStatus();
+    }, 10000); // Update every 10 seconds
+    return () => clearInterval(interval);
+  }, []);
 
-  const handleScan = () => {
+  const fetchDeviceData = async () => {
+    try {
+      // Get real devices from backend
+      const devicesResponse = await api.get('/devices');
+      const devices = devicesResponse.data.data || [];
+      
+      // Separate connected and available devices
+      const connected = devices.map(device => ({
+        id: device._id || device.id,
+        name: device.name || `${device.type} Device`,
+        type: device.type || 'Unknown',
+        status: device.status ? 'online' : 'offline',
+        battery: Math.floor(Math.random() * 40) + 60 // Simulate battery
+      }));
+      
+      // Generate some available devices for pairing
+      const available = [
+        { id: 'esp32-1', name: 'ESP32-Light-New', type: 'Light Controller', status: 'available', signal: Math.floor(Math.random() * 30) + 70 },
+        { id: 'esp32-2', name: 'ESP32-Fan-New', type: 'Fan Controller', status: 'available', signal: Math.floor(Math.random() * 30) + 70 },
+        { id: 'nodemcu-1', name: 'NodeMCU-Sensor-New', type: 'Motion Sensor', status: 'available', signal: Math.floor(Math.random() * 30) + 70 }
+      ];
+      
+      setConnectedDevices(connected);
+      setAvailableDevices(available);
+      setLoading(false);
+    } catch (error) {
+      console.error('Failed to fetch device data:', error);
+      setLoading(false);
+    }
+  };
+
+  const fetchNetworkStatus = async () => {
+    try {
+      // Get real network information
+      const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+      const isOnline = navigator.onLine;
+      
+      // Get WiFi info (simulated as browser can't access actual WiFi details)
+      const wifiInfo = {
+        connected: isOnline,
+        ssid: isOnline ? 'CareConnect_Network' : 'Disconnected',
+        signal: isOnline ? Math.floor(Math.random() * 20) + 80 : 0
+      };
+      
+      // Check backend connectivity for MQTT status
+      let mqttStatus = { connected: false, broker: 'broker.hivemq.com' };
+      let cloudStatus = { active: false, lastSync: null };
+      
+      try {
+        const healthResponse = await api.get('/gesture/health');
+        if (healthResponse.data.success) {
+          mqttStatus.connected = true;
+          cloudStatus.active = true;
+          cloudStatus.lastSync = new Date().toISOString();
+        }
+      } catch (error) {
+        console.log('Backend not available for MQTT status');
+      }
+      
+      setNetworkStatus({
+        wifi: wifiInfo,
+        mqtt: mqttStatus,
+        cloudSync: cloudStatus
+      });
+    } catch (error) {
+      console.error('Failed to fetch network status:', error);
+    }
+  };
+
+  const handleScan = async () => {
     setScanning(true);
-    setTimeout(() => setScanning(false), 3000);
+    try {
+      // Simulate device discovery
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      
+      // Add a new discovered device
+      const newDevice = {
+        id: `discovered-${Date.now()}`,
+        name: `ESP32-${Math.floor(Math.random() * 100)}`,
+        type: ['Light Controller', 'Fan Controller', 'Motion Sensor'][Math.floor(Math.random() * 3)],
+        status: 'available',
+        signal: Math.floor(Math.random() * 30) + 70
+      };
+      
+      setAvailableDevices(prev => [newDevice, ...prev]);
+    } catch (error) {
+      console.error('Scan failed:', error);
+    } finally {
+      setScanning(false);
+    }
+  };
+
+  const handlePairDevice = async (deviceId) => {
+    try {
+      const device = availableDevices.find(d => d.id === deviceId);
+      if (device) {
+        // Move device to connected list
+        const connectedDevice = {
+          id: device.id,
+          name: device.name.replace('-New', ''),
+          type: device.type,
+          status: 'online',
+          battery: Math.floor(Math.random() * 40) + 60
+        };
+        
+        setConnectedDevices(prev => [...prev, connectedDevice]);
+        setAvailableDevices(prev => prev.filter(d => d.id !== deviceId));
+      }
+    } catch (error) {
+      console.error('Failed to pair device:', error);
+    }
+  };
+
+  const handleRemoveDevice = async (deviceId) => {
+    try {
+      setConnectedDevices(prev => prev.filter(d => d.id !== deviceId));
+    } catch (error) {
+      console.error('Failed to remove device:', error);
+    }
+  };
+
+  const getTimeAgo = (timestamp) => {
+    if (!timestamp) return 'Never';
+    const now = new Date();
+    const time = new Date(timestamp);
+    const diffMs = now - time;
+    const diffMins = Math.floor(diffMs / 60000);
+    
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins} min ago`;
+    const diffHours = Math.floor(diffMins / 60);
+    if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+    return 'Over a day ago';
   };
 
   return (
@@ -26,10 +163,10 @@ const DeviceSetup = () => {
       <div 
         className="fixed inset-0 bg-cover bg-center bg-no-repeat"
         style={{
-          backgroundImage: 'url(https://img.freepik.com/free-psd/3d-rendering-device-background_23-2150571835.jpg)'
+          backgroundImage: 'url(https://png.pngtree.com/thumb_back/fh260/background/20230703/pngtree-3d-render-of-responsive-devices-in-home-office-setup-image_3765800.jpg)'
         }}
       >
-        <div className="absolute inset-0 bg-black/40"></div>
+        <div className="absolute inset-0 bg-black/30"></div>
       </div>
       
       <div className="relative z-10 pt-56 p-4 md:p-6 pb-24" style={{zIndex: 10}}>
@@ -77,44 +214,59 @@ const DeviceSetup = () => {
               <span>Available Devices</span>
             </h3>
             <div className="space-y-3">
-              {availableDevices.map((device) => (
-                <div key={device.id} className="bg-white/10 rounded-xl p-4 border border-white/20">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-12 h-12 bg-gradient-to-r from-blue-500/30 to-purple-600/30 rounded-lg flex items-center justify-center">
-                        {device.type === 'Light Controller' ? (
-                          <svg className="w-6 h-6 text-yellow-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12,6A6,6 0 0,1 18,12C18,14.22 16.79,16.16 15,17.2V19A1,1 0 0,1 14,20H10A1,1 0 0,1 9,19V17.2C7.21,16.16 6,14.22 6,12A6,6 0 0,1 12,6M14,21V22A1,1 0 0,1 13,23H11A1,1 0 0,1 10,22V21H14M20,11H23V13H20V11M1,11H4V13H1V11M13,1V4H11V1H13M4.92,3.5L7.05,5.64L5.63,7.05L3.5,4.93L4.92,3.5M16.95,5.63L19.07,3.5L20.5,4.93L18.37,7.05L16.95,5.63Z"/></svg>
-                        ) : device.type === 'Fan Controller' ? (
-                          <svg className="w-6 h-6 text-blue-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12,11A1,1 0 0,0 11,12A1,1 0 0,0 12,13A1,1 0 0,0 13,12A1,1 0 0,0 12,11M12.5,2C17,2 17.11,5.57 14.75,6.75C13.76,7.24 13.32,8.29 13.13,9.22C13.61,9.42 14.03,9.73 14.35,10.13C18.05,8.13 22.03,8.92 22.03,12.5C22.03,17 18.46,17.1 17.28,14.73C16.78,13.74 15.72,13.3 14.79,13.11C14.59,13.59 14.28,14 13.88,14.34C15.87,18.03 15.08,22 11.5,22C7,22 6.91,18.42 9.27,17.24C10.25,16.75 10.69,15.71 10.89,14.79C10.4,14.59 9.97,14.27 9.65,13.87C5.96,15.85 2,15.07 2,11.5C2,7 5.56,6.89 6.74,9.26C7.24,10.25 8.29,10.68 9.22,10.87C9.41,10.39 9.73,9.97 10.14,9.65C8.15,5.96 8.94,2 12.5,2Z"/></svg>
-                        ) : device.type === 'Motion Sensor' ? (
-                          <svg className="w-6 h-6 text-green-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12,2A2,2 0 0,1 14,4C14,4.74 13.6,5.39 13,5.73V7H14A7,7 0 0,1 21,14H22A1,1 0 0,1 23,15V18A1,1 0 0,1 22,19H21V20A2,2 0 0,1 19,22H5A2,2 0 0,1 3,20V19H2A1,1 0 0,1 1,18V15A1,1 0 0,1 2,14H3A7,7 0 0,1 10,7H11V5.73C10.4,5.39 10,4.74 10,4A2,2 0 0,1 12,2M7.5,13A2.5,2.5 0 0,0 5,15.5A2.5,2.5 0 0,0 7.5,18A2.5,2.5 0 0,0 10,15.5A2.5,2.5 0 0,0 7.5,13M16.5,13A2.5,2.5 0 0,0 14,15.5A2.5,2.5 0 0,0 16.5,18A2.5,2.5 0 0,0 19,15.5A2.5,2.5 0 0,0 16.5,13Z"/></svg>
+              {loading ? (
+                <div className="text-center py-8">
+                  <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin mx-auto mb-4"></div>
+                  <p className="text-white/70">Scanning for devices...</p>
+                </div>
+              ) : availableDevices.length > 0 ? (
+                availableDevices.map((device) => (
+                  <div key={device.id} className="bg-white/10 rounded-xl p-4 border border-white/20">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-12 h-12 bg-gradient-to-r from-blue-500/30 to-purple-600/30 rounded-lg flex items-center justify-center">
+                          {device.type === 'Light Controller' ? (
+                            <svg className="w-6 h-6 text-yellow-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12,6A6,6 0 0,1 18,12C18,14.22 16.79,16.16 15,17.2V19A1,1 0 0,1 14,20H10A1,1 0 0,1 9,19V17.2C7.21,16.16 6,14.22 6,12A6,6 0 0,1 12,6M14,21V22A1,1 0 0,1 13,23H11A1,1 0 0,1 10,22V21H14M20,11H23V13H20V11M1,11H4V13H1V11M13,1V4H11V1H13M4.92,3.5L7.05,5.64L5.63,7.05L3.5,4.93L4.92,3.5M16.95,5.63L19.07,3.5L20.5,4.93L18.37,7.05L16.95,5.63Z"/></svg>
+                          ) : device.type === 'Fan Controller' ? (
+                            <svg className="w-6 h-6 text-blue-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12,11A1,1 0 0,0 11,12A1,1 0 0,0 12,13A1,1 0 0,0 13,12A1,1 0 0,0 12,11M12.5,2C17,2 17.11,5.57 14.75,6.75C13.76,7.24 13.32,8.29 13.13,9.22C13.61,9.42 14.03,9.73 14.35,10.13C18.05,8.13 22.03,8.92 22.03,12.5C22.03,17 18.46,17.1 17.28,14.73C16.78,13.74 15.72,13.3 14.79,13.11C14.59,13.59 14.28,14 13.88,14.34C15.87,18.03 15.08,22 11.5,22C7,22 6.91,18.42 9.27,17.24C10.25,16.75 10.69,15.71 10.89,14.79C10.4,14.59 9.97,14.27 9.65,13.87C5.96,15.85 2,15.07 2,11.5C2,7 5.56,6.89 6.74,9.26C7.24,10.25 8.29,10.68 9.22,10.87C9.41,10.39 9.73,9.97 10.14,9.65C8.15,5.96 8.94,2 12.5,2Z"/></svg>
+                          ) : device.type === 'Motion Sensor' ? (
+                            <svg className="w-6 h-6 text-green-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12,2A2,2 0 0,1 14,4C14,4.74 13.6,5.39 13,5.73V7H14A7,7 0 0,1 21,14H22A1,1 0 0,1 23,15V18A1,1 0 0,1 22,19H21V20A2,2 0 0,1 19,22H5A2,2 0 0,1 3,20V19H2A1,1 0 0,1 1,18V15A1,1 0 0,1 2,14H3A7,7 0 0,1 10,7H11V5.73C10.4,5.39 10,4.74 10,4A2,2 0 0,1 12,2M7.5,13A2.5,2.5 0 0,0 5,15.5A2.5,2.5 0 0,0 7.5,18A2.5,2.5 0 0,0 10,15.5A2.5,2.5 0 0,0 7.5,13M16.5,13A2.5,2.5 0 0,0 14,15.5A2.5,2.5 0 0,0 16.5,18A2.5,2.5 0 0,0 19,15.5A2.5,2.5 0 0,0 16.5,13Z"/></svg>
+                          ) : (
+                            <svg className="w-6 h-6 text-red-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                          )}
+                        </div>
+                        <div>
+                          <p className="text-white font-medium">{device.name}</p>
+                          <p className="text-slate-300 text-sm">{device.type}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <div className="flex items-center space-x-1">
+                          <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                          <span className="text-slate-300 text-sm font-medium">{device.signal}%</span>
+                        </div>
+                        {device.status === 'available' ? (
+                          <button 
+                            onClick={() => handlePairDevice(device.id)}
+                            className="bg-green-500/20 text-green-300 px-4 py-2 rounded-lg text-sm border border-green-400/30 hover:bg-green-500/30 transition-all"
+                          >
+                            Pair
+                          </button>
                         ) : (
-                          <svg className="w-6 h-6 text-red-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                          <span className="bg-blue-500/20 text-blue-300 px-4 py-2 rounded-lg text-sm border border-blue-400/30">
+                            Paired
+                          </span>
                         )}
                       </div>
-                      <div>
-                        <p className="text-white font-medium">{device.name}</p>
-                        <p className="text-slate-300 text-sm">{device.type}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <div className="flex items-center space-x-1">
-                        <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-                        <span className="text-slate-300 text-sm font-medium">{device.signal}%</span>
-                      </div>
-                      {device.status === 'available' ? (
-                        <button className="bg-green-500/20 text-green-300 px-4 py-2 rounded-lg text-sm border border-green-400/30 hover:bg-green-500/30 transition-all">
-                          Pair
-                        </button>
-                      ) : (
-                        <span className="bg-blue-500/20 text-blue-300 px-4 py-2 rounded-lg text-sm border border-blue-400/30">
-                          Paired
-                        </span>
-                      )}
                     </div>
                   </div>
+                ))
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-white/70">No devices found</p>
+                  <p className="text-white/50 text-sm mt-2">Click "Scan for Devices" to discover new devices</p>
                 </div>
-              ))}
+              )}
             </div>
           </div>
 
@@ -124,31 +276,46 @@ const DeviceSetup = () => {
               <span>Connected Devices</span>
             </h3>
             <div className="space-y-3">
-              {connectedDevices.map((device) => (
-                <div key={device.id} className="bg-white/10 rounded-xl p-4 border border-white/20">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-4 h-4 rounded-full ${device.status === 'online' ? 'bg-green-400 animate-pulse' : 'bg-red-400'}`}></div>
-                      <div>
-                        <p className="text-white font-medium">{device.name}</p>
-                        <p className="text-slate-300 text-sm">{device.type}</p>
+              {loading ? (
+                <div className="text-center py-8">
+                  <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin mx-auto mb-4"></div>
+                  <p className="text-white/70">Loading connected devices...</p>
+                </div>
+              ) : connectedDevices.length > 0 ? (
+                connectedDevices.map((device) => (
+                  <div key={device.id} className="bg-white/10 rounded-xl p-4 border border-white/20">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className={`w-4 h-4 rounded-full ${device.status === 'online' ? 'bg-green-400 animate-pulse' : 'bg-red-400'}`}></div>
+                        <div>
+                          <p className="text-white font-medium">{device.name}</p>
+                          <p className="text-slate-300 text-sm">{device.type}</p>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <div className="text-right">
-                        <p className="text-slate-300 text-xs">Battery</p>
-                        <p className={`text-sm font-medium ${
-                          device.battery > 80 ? 'text-green-400' :
-                          device.battery > 50 ? 'text-yellow-400' : 'text-red-400'
-                        }`}>{device.battery}%</p>
+                      <div className="flex items-center space-x-3">
+                        <div className="text-right">
+                          <p className="text-slate-300 text-xs">Battery</p>
+                          <p className={`text-sm font-medium ${
+                            device.battery > 80 ? 'text-green-400' :
+                            device.battery > 50 ? 'text-yellow-400' : 'text-red-400'
+                          }`}>{device.battery}%</p>
+                        </div>
+                        <button 
+                          onClick={() => handleRemoveDevice(device.id)}
+                          className="bg-red-500/20 text-red-300 px-4 py-2 rounded-lg text-sm border border-red-400/30 hover:bg-red-500/30 transition-all"
+                        >
+                          Remove
+                        </button>
                       </div>
-                      <button className="bg-red-500/20 text-red-300 px-4 py-2 rounded-lg text-sm border border-red-400/30 hover:bg-red-500/30 transition-all">
-                        Remove
-                      </button>
                     </div>
                   </div>
+                ))
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-white/70">No devices connected</p>
+                  <p className="text-white/50 text-sm mt-2">Pair devices from the available list</p>
                 </div>
-              ))}
+              )}
             </div>
           </div>
         </div>
@@ -207,26 +374,32 @@ const DeviceSetup = () => {
             <div className="bg-white/10 rounded-xl p-4 border border-white/20">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-slate-300">Wi-Fi Connection</span>
-                <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                <div className={`w-3 h-3 rounded-full ${networkStatus.wifi.connected ? 'bg-green-400 animate-pulse' : 'bg-red-400'}`}></div>
               </div>
-              <p className="text-white font-bold">SmartHome_Network</p>
-              <p className="text-green-400 text-sm">Signal: Strong (95%)</p>
+              <p className="text-white font-bold">{networkStatus.wifi.ssid}</p>
+              <p className={`text-sm ${networkStatus.wifi.connected ? 'text-green-400' : 'text-red-400'}`}>
+                {networkStatus.wifi.connected ? `Signal: Strong (${networkStatus.wifi.signal}%)` : 'Disconnected'}
+              </p>
             </div>
             <div className="bg-white/10 rounded-xl p-4 border border-white/20">
               <div className="flex items-center justify-between mb-3">
-                <span className="text-slate-300">MQTT Broker</span>
-                <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                <span className="text-slate-300">Backend Connection</span>
+                <div className={`w-3 h-3 rounded-full ${networkStatus.mqtt.connected ? 'bg-green-400 animate-pulse' : 'bg-red-400'}`}></div>
               </div>
-              <p className="text-white font-bold">Connected</p>
-              <p className="text-blue-400 text-sm">broker.hivemq.com</p>
+              <p className="text-white font-bold">{networkStatus.mqtt.connected ? 'Connected' : 'Disconnected'}</p>
+              <p className={`text-sm ${networkStatus.mqtt.connected ? 'text-blue-400' : 'text-red-400'}`}>
+                {networkStatus.mqtt.broker}
+              </p>
             </div>
             <div className="bg-white/10 rounded-xl p-4 border border-white/20">
               <div className="flex items-center justify-between mb-3">
-                <span className="text-slate-300">Cloud Sync</span>
-                <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                <span className="text-slate-300">Data Sync</span>
+                <div className={`w-3 h-3 rounded-full ${networkStatus.cloudSync.active ? 'bg-green-400 animate-pulse' : 'bg-yellow-400'}`}></div>
               </div>
-              <p className="text-white font-bold">Active</p>
-              <p className="text-purple-400 text-sm">Last sync: 2 min ago</p>
+              <p className="text-white font-bold">{networkStatus.cloudSync.active ? 'Active' : 'Pending'}</p>
+              <p className={`text-sm ${networkStatus.cloudSync.active ? 'text-purple-400' : 'text-yellow-400'}`}>
+                Last sync: {getTimeAgo(networkStatus.cloudSync.lastSync)}
+              </p>
             </div>
           </div>
         </div>

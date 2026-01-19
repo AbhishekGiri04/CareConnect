@@ -329,7 +329,7 @@ const DeviceControl = () => {
       <div 
         className="fixed inset-0 bg-cover bg-center bg-no-repeat"
         style={{
-          backgroundImage: 'url(https://img.freepik.com/free-photo/home-automation-with-objects-desk_23-2148994151.jpg?semt=ais_hybrid&w=740&q=80)'
+          backgroundImage: 'url(https://www.shutterstock.com/image-photo/set-modern-devices-on-dark-600nw-2562035367.jpg)'
         }}
       >
         <div className="absolute inset-0 bg-black/30"></div>

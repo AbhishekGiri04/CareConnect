@@ -45,11 +45,16 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-5" style={{
+    <div className="fixed inset-0 flex items-center justify-center p-5 z-50" style={{
       background: 'linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url("https://myrealestate.in/storage/2023/03/Collage-Smart-Homes.jpg")',
       backgroundSize: 'cover',
       backgroundPosition: 'center',
-      backgroundAttachment: 'fixed'
+      backgroundAttachment: 'fixed',
+      width: '100vw',
+      height: '100vh',
+      margin: 0,
+      padding: '20px',
+      overflow: 'hidden'
     }}>
       <div className={`auth-wrapper ${isSignUp ? 'panel-active' : ''}`}>
         {/* Sign Up Form */}
@@ -139,12 +144,12 @@ const Auth = () => {
         <div className="slide-panel-wrapper">
           <div className="slide-panel">
             <div className="panel-content panel-content-left">
-              <h1 style={{color: '#d1d5db'}}>Welcome Back!</h1>
+              <h1 style={{color: '#000000'}}>Welcome Back!</h1>
               <p>Stay connected by logging in with your credentials and continue your CareConnect experience</p>
               <button className="transparent-btn" onClick={() => setIsSignUp(false)}>Sign In</button>
             </div>
             <div className="panel-content panel-content-right">
-              <h1 style={{color: '#d1d5db'}}>Hey There!</h1>
+              <h1 style={{color: '#000000'}}>Hey There!</h1>
               <p>Begin your amazing journey with CareConnect by creating an account with us today</p>
               <button className="transparent-btn" onClick={() => setIsSignUp(true)}>Sign Up</button>
             </div>
@@ -155,8 +160,14 @@ const Auth = () => {
       <style jsx>{`
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
         
+        body {
+          margin: 0 !important;
+          padding: 0 !important;
+          overflow: hidden !important;
+        }
+        
         .logo {
-          margin-bottom: 20px;
+          margin-bottom: 10px;
         }
 
         .logo h2 {
@@ -304,7 +315,7 @@ const Auth = () => {
 
         h1 {
           font-weight: 700;
-          margin: 0 0 20px 0;
+          margin: 0 0 10px 0;
           font-size: 28px;
           color: #333;
         }
@@ -359,7 +370,7 @@ const Auth = () => {
         }
 
         .social-links {
-          margin: 25px 0;
+          margin: 15px 0;
         }
 
         .social-links a {
@@ -387,7 +398,7 @@ const Auth = () => {
         span {
           font-size: 13px;
           color: #666;
-          margin: 15px 0;
+          margin: 10px 0;
           display: block;
         }
 

@@ -68,10 +68,10 @@ const BackendController = () => {
       <div 
         className="fixed inset-0 bg-cover bg-center bg-no-repeat"
         style={{
-          backgroundImage: 'url(https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS5HQFTcY8v4WoS2ojp1B4EywUdG3f5Jnkh9Q&s)'
+          backgroundImage: 'url(https://thumbs.dreamstime.com/b/digital-healthcare-technology-concept-ai-human-hand-touch-medical-cross-icon-virtual-interface-futuristic-innovation-medicine-413115338.jpg)'
         }}
       >
-        <div className="absolute inset-0 bg-black/40"></div>
+        <div className="absolute inset-0 bg-black/30"></div>
       </div>
       
       <div className="relative z-10 pt-56 p-4 md:p-6 pb-24" style={{zIndex: 10}}>

@@ -28,12 +28,19 @@ function AppContent() {
   const location = useLocation();
   const isLoginPage = location.pathname === '/';
 
+  if (isLoginPage) {
+    return (
+      <Routes>
+        <Route path="/" element={<Auth />} />
+      </Routes>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col">
       <TopNavbar />
       <main className="flex-1">
         <Routes>
-          <Route path="/" element={<Auth />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/devices" element={<DeviceControl />} />
           <Route path="/alerts" element={<Alerts />} />
@@ -50,7 +57,7 @@ function AppContent() {
           <Route path="/communication" element={<Communication />} />
         </Routes>
       </main>
-      {!isLoginPage && <Footer />}
+      <Footer />
     </div>
   );
 }

@@ -5,9 +5,18 @@ const cors = require('cors');
 const axios = require('axios');
 const fs = require('fs');
 const nodemailer = require('nodemailer');
+const http = require('http');
+const socketIo = require('socket.io');
 require('dotenv').config();
 
 const app = express();
+const server = http.createServer(app);
+const io = socketIo(server, {
+    cors: {
+        origin: "http://localhost:3002",
+        methods: ["GET", "POST"]
+    }
+});
 const PORT = 3001;
 
 // Email transporter setup
@@ -59,6 +68,138 @@ app.get('/gesture-control', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'gesture-control.html'));
 });
 
+// Activity logging storage
+let activityLog = [];
+
+// Activity endpoints
+app.get('/api/activity/recent', (req, res) => {
+    const limit = parseInt(req.query.limit) || 10;
+    const recentActivities = activityLog
+        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+        .slice(0, limit)
+        .map(activity => ({
+            ...activity,
+            time: getTimeAgo(activity.timestamp)
+        }));
+    
+    res.json({ 
+        success: true, 
+        data: recentActivities,
+        total: activityLog.length
+    });
+});
+
+app.post('/api/activity/add', (req, res) => {
+    const { type, action, timestamp } = req.body;
+    
+    // Check for duplicate activities (same action and type within last 5 seconds)
+    const now = Date.now();
+    const isDuplicate = activityLog.some(activity => 
+        activity.action === action && 
+        activity.type === type &&
+        (now - new Date(activity.timestamp).getTime()) < 5000
+    );
+    
+    if (isDuplicate) {
+        console.log(`🚫 Duplicate activity prevented: [${type}] ${action}`);
+        return res.json({ 
+            success: true, 
+            message: 'Duplicate activity prevented',
+            duplicate: true
+        });
+    }
+    
+    const newActivity = {
+        id: Date.now(),
+        type: type || 'system',
+        action: action || 'Unknown activity',
+        timestamp: timestamp || new Date().toISOString(),
+        time: 'Just now'
+    };
+    
+    activityLog.unshift(newActivity);
+    
+    // Keep only last 50 activities
+    if (activityLog.length > 50) {
+        activityLog = activityLog.slice(0, 50);
+    }
+    
+    console.log(`📝 Activity logged: [${type}] ${action}`);
+    
+    // Emit real-time activity update to all connected clients
+    io.emit('activity_update', newActivity);
+    
+    res.json({ 
+        success: true, 
+        data: newActivity,
+        message: 'Activity logged successfully'
+    });
+});
+
+app.delete('/api/activity/clear', (req, res) => {
+    activityLog = [];
+    console.log('🗑️ Activity log cleared');
+    
+    res.json({ 
+        success: true, 
+        message: 'Activity log cleared'
+    });
+});
+
+// Helper function to calculate time ago
+function getTimeAgo(timestamp) {
+    const now = new Date();
+    const activityTime = new Date(timestamp);
+    const diffMs = now - activityTime;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+    
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
+    if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+    return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+}
+
+// Add initial system activity
+activityLog.push({
+    id: Date.now(),
+    type: 'system',
+    action: 'CareConnect backend started',
+    timestamp: new Date().toISOString(),
+    time: 'Just now'
+});
+
+// Socket.IO connection handling
+io.on('connection', (socket) => {
+    console.log('🔌 Client connected:', socket.id);
+    
+    // Send current activity log to newly connected client
+    const recentActivities = activityLog
+        .slice(0, 10)
+        .map(activity => ({
+            ...activity,
+            time: getTimeAgo(activity.timestamp)
+        }));
+    
+    socket.emit('initial_activities', recentActivities);
+    
+    socket.on('disconnect', () => {
+        console.log('🔌 Client disconnected:', socket.id);
+    });
+    
+    // Handle real-time activity requests
+    socket.on('request_activities', () => {
+        const activities = activityLog
+            .slice(0, 10)
+            .map(activity => ({
+                ...activity,
+                time: getTimeAgo(activity.timestamp)
+            }));
+        socket.emit('activities_update', activities);
+    });
+});
+
 // Device storage for CareMe integration
 let careDevices = {
     LED1: { name: 'Living Room', status: false, lastUpdated: Date.now() },
@@ -83,6 +224,23 @@ app.post('/api/care/devices/toggle', (req, res) => {
     careDevices[deviceId].lastUpdated = Date.now();
     
     console.log(`💡 ${careDevices[deviceId].name} ${status ? 'ON' : 'OFF'}`);
+    
+    // Log activity and emit real-time update
+    const activity = {
+        id: Date.now(),
+        type: 'device',
+        action: `${careDevices[deviceId].name} turned ${status ? 'ON' : 'OFF'}`,
+        timestamp: new Date().toISOString(),
+        time: 'Just now'
+    };
+    
+    activityLog.unshift(activity);
+    io.emit('activity_update', activity);
+    io.emit('device_status_change', {
+        deviceName: careDevices[deviceId].name,
+        status: status ? 'on' : 'off',
+        deviceId
+    });
     
     res.json({ 
         success: true, 
@@ -1153,13 +1311,16 @@ app.post('/api/communication/quick-phrase', (req, res) => {
     });
 });
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`CareConnect Backend API running at http://localhost:${PORT}`);
     console.log('Frontend should connect to this backend');
     console.log('Available endpoints:');
     console.log('   - GET  /api/devices - Device list');
     console.log('   - POST /api/devices/:id/control - Device control');
     console.log('   - GET  /api/dashboard/stats - Dashboard data');
+    console.log('   - GET  /api/activity/recent - Get recent activities');
+    console.log('   - POST /api/activity/add - Add new activity');
+    console.log('   - DELETE /api/activity/clear - Clear activity log');
     console.log('   - GET  /api/accessibility/settings - Get accessibility settings');
     console.log('   - POST /api/accessibility/settings - Update accessibility settings');
     console.log('   - GET  /api/accessibility/load - Load saved accessibility settings');
@@ -1184,6 +1345,8 @@ app.listen(PORT, () => {
     console.log('   - GET  /api/security/status - Security system');
     console.log('   - POST /api/emergency/trigger - Emergency alerts');
     console.log('   - POST /api/communication/* - Communication tools');
+    console.log('   - Socket.IO: Real-time activity updates enabled');
+    console.log('\n📝 Activity logging initialized with real-time updates');
     
     // Load accessibility settings on startup
     try {

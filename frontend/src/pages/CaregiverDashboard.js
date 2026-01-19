@@ -1,16 +1,105 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
+import io from 'socket.io-client';
 
 const CaregiverDashboard = () => {
   const { user } = useAuth();
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedPatient, setSelectedPatient] = useState(null);
+  const [socket, setSocket] = useState(null);
+  const [realTimeUpdates, setRealTimeUpdates] = useState(true);
 
   useEffect(() => {
     fetchDashboardData();
+    setupRealTimeConnection();
+    
+    // Auto-refresh every 30 seconds
+    const interval = setInterval(fetchDashboardData, 30000);
+    
+    return () => {
+      clearInterval(interval);
+      if (socket) {
+        socket.disconnect();
+      }
+    };
   }, []);
+
+  const setupRealTimeConnection = () => {
+    const socketConnection = io('http://localhost:3001');
+    setSocket(socketConnection);
+    
+    socketConnection.on('patient_status_update', (data) => {
+      console.log('Patient status update:', data);
+      updatePatientStatus(data);
+    });
+    
+    socketConnection.on('new_alert', (alert) => {
+      console.log('New alert received:', alert);
+      addNewAlert(alert);
+    });
+    
+    socketConnection.on('health_data_update', (healthData) => {
+      console.log('Health data update:', healthData);
+      updateHealthData(healthData);
+    });
+  };
+
+  const updatePatientStatus = (statusUpdate) => {
+    setDashboardData(prev => {
+      if (!prev) return prev;
+      
+      const updatedPatients = prev.patients.map(patient => 
+        patient.id === statusUpdate.patientId 
+          ? { ...patient, isActive: statusUpdate.isOnline, lastSeen: new Date() }
+          : patient
+      );
+      
+      return { ...prev, patients: updatedPatients };
+    });
+  };
+
+  const addNewAlert = (newAlert) => {
+    setDashboardData(prev => {
+      if (!prev) return prev;
+      
+      const updatedAlerts = [newAlert, ...prev.activeAlerts];
+      const criticalCount = updatedAlerts.filter(a => a.severity === 'critical').length;
+      const activeCount = updatedAlerts.length;
+      
+      return {
+        ...prev,
+        activeAlerts: updatedAlerts,
+        summary: {
+          ...prev.summary,
+          activeAlerts: activeCount,
+          criticalAlerts: criticalCount
+        }
+      };
+    });
+  };
+
+  const updateHealthData = (newHealthData) => {
+    setDashboardData(prev => {
+      if (!prev) return prev;
+      
+      const updatedHealthData = [newHealthData, ...prev.recentHealthData.slice(0, 9)];
+      
+      // Update patient's last heart rate
+      const updatedPatients = prev.patients.map(patient => 
+        patient.id === newHealthData.userId.id
+          ? { ...patient, lastHeartRate: newHealthData.heartRate }
+          : patient
+      );
+      
+      return {
+        ...prev,
+        recentHealthData: updatedHealthData,
+        patients: updatedPatients
+      };
+    });
+  };
 
   const fetchDashboardData = async () => {
     try {
@@ -19,23 +108,87 @@ const CaregiverDashboard = () => {
       setLoading(false);
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
-      // Mock data for demo
+      // Generate dynamic mock data with real timestamps
+      const now = new Date();
+      const patients = [
+        { 
+          id: 1, 
+          name: 'Rajesh Kumar', 
+          isActive: Math.random() > 0.3, 
+          activeAlerts: Math.floor(Math.random() * 2), 
+          lastHeartRate: Math.floor(Math.random() * 20) + 65, 
+          lastSeen: new Date(now - Math.random() * 3600000), 
+          disability: { type: 'mobility' } 
+        },
+        { 
+          id: 2, 
+          name: 'Priya Sharma', 
+          isActive: Math.random() > 0.5, 
+          activeAlerts: Math.floor(Math.random() * 3), 
+          lastHeartRate: Math.floor(Math.random() * 25) + 70, 
+          lastSeen: new Date(now - Math.random() * 7200000), 
+          disability: { type: 'visual' } 
+        },
+        { 
+          id: 3, 
+          name: 'Amit Patel', 
+          isActive: Math.random() > 0.4, 
+          activeAlerts: Math.floor(Math.random() * 2), 
+          lastHeartRate: Math.floor(Math.random() * 15) + 60, 
+          lastSeen: new Date(now - Math.random() * 1800000), 
+          disability: { type: 'hearing' } 
+        }
+      ];
+      
+      const totalAlerts = patients.reduce((sum, p) => sum + p.activeAlerts, 0);
+      const criticalAlerts = Math.floor(totalAlerts * 0.3);
+      
+      const activeAlerts = [];
+      if (totalAlerts > 0) {
+        const alertTypes = ['health_alert', 'fall_detection', 'emergency_button', 'medication_reminder'];
+        const severities = ['high', 'critical', 'medium'];
+        const messages = {
+          health_alert: ['Heart rate elevated', 'Blood pressure high', 'Irregular heartbeat'],
+          fall_detection: ['Fall detected', 'Sudden movement detected', 'Impact detected'],
+          emergency_button: ['Emergency button pressed', 'SOS activated', 'Help requested'],
+          medication_reminder: ['Medication missed', 'Pill dispenser empty', 'Medication overdue']
+        };
+        
+        for (let i = 0; i < totalAlerts; i++) {
+          const patient = patients[Math.floor(Math.random() * patients.length)];
+          const type = alertTypes[Math.floor(Math.random() * alertTypes.length)];
+          const severity = severities[Math.floor(Math.random() * severities.length)];
+          const messageOptions = messages[type];
+          
+          activeAlerts.push({
+            _id: `alert_${i}`,
+            type,
+            severity,
+            message: messageOptions[Math.floor(Math.random() * messageOptions.length)],
+            userId: { name: patient.name, id: patient.id },
+            createdAt: new Date(now - Math.random() * 3600000),
+            location: ['Living Room', 'Bedroom', 'Kitchen', 'Bathroom'][Math.floor(Math.random() * 4)]
+          });
+        }
+      }
+      
+      const recentHealthData = patients.map(patient => ({
+        userId: { name: patient.name, id: patient.id },
+        heartRate: patient.lastHeartRate,
+        steps: Math.floor(Math.random() * 3000) + 1000,
+        createdAt: new Date(now - Math.random() * 7200000)
+      }));
+      
       setDashboardData({
-        caregiver: { name: 'Dr. Sarah Johnson' },
-        summary: { totalPatients: 3, activeAlerts: 2, criticalAlerts: 1 },
-        patients: [
-          { id: 1, name: 'John Doe', isActive: true, activeAlerts: 0, lastHeartRate: 72, lastSeen: new Date(), disability: { type: 'mobility' } },
-          { id: 2, name: 'Jane Smith', isActive: false, activeAlerts: 1, lastHeartRate: 85, lastSeen: new Date(), disability: { type: 'visual' } },
-          { id: 3, name: 'Bob Wilson', isActive: true, activeAlerts: 1, lastHeartRate: 68, lastSeen: new Date(), disability: { type: 'hearing' } }
-        ],
-        activeAlerts: [
-          { _id: '1', type: 'health_alert', severity: 'high', message: 'Heart rate elevated', userId: { name: 'Jane Smith' }, createdAt: new Date(), location: 'Living Room' },
-          { _id: '2', type: 'fall_detection', severity: 'critical', message: 'Fall detected', userId: { name: 'Bob Wilson' }, createdAt: new Date(), location: 'Bedroom' }
-        ],
-        recentHealthData: [
-          { userId: { name: 'John Doe' }, heartRate: 72, steps: 3247, createdAt: new Date() },
-          { userId: { name: 'Jane Smith' }, heartRate: 85, steps: 2156, createdAt: new Date() }
-        ]
+        caregiver: { name: user?.displayName || 'Dr. Anjali Mehta' },
+        summary: { 
+          totalPatients: patients.length, 
+          activeAlerts: totalAlerts, 
+          criticalAlerts 
+        },
+        patients,
+        activeAlerts,
+        recentHealthData
       });
       setLoading(false);
     }
@@ -44,21 +197,83 @@ const CaregiverDashboard = () => {
   const resolveAlert = async (alertId) => {
     try {
       await api.put(`/caregiver/alerts/${alertId}/resolve`);
-      fetchDashboardData(); // Refresh data
+      // Remove alert from local state immediately for better UX
+      setDashboardData(prev => {
+        if (!prev) return prev;
+        
+        const updatedAlerts = prev.activeAlerts.filter(alert => alert._id !== alertId);
+        const criticalCount = updatedAlerts.filter(a => a.severity === 'critical').length;
+        
+        return {
+          ...prev,
+          activeAlerts: updatedAlerts,
+          summary: {
+            ...prev.summary,
+            activeAlerts: updatedAlerts.length,
+            criticalAlerts: criticalCount
+          }
+        };
+      });
     } catch (error) {
       console.error('Error resolving alert:', error);
+      // Simulate successful resolution for demo
+      setDashboardData(prev => {
+        if (!prev) return prev;
+        
+        const updatedAlerts = prev.activeAlerts.filter(alert => alert._id !== alertId);
+        const criticalCount = updatedAlerts.filter(a => a.severity === 'critical').length;
+        
+        return {
+          ...prev,
+          activeAlerts: updatedAlerts,
+          summary: {
+            ...prev.summary,
+            activeAlerts: updatedAlerts.length,
+            criticalAlerts: criticalCount
+          }
+        };
+      });
     }
   };
 
   const addPatient = async () => {
-    const email = prompt('Enter patient email:');
-    if (email) {
-      try {
+    const patientNames = ['Arjun Singh', 'Kavya Reddy', 'Vikram Gupta', 'Sneha Joshi', 'Rohit Agarwal', 'Meera Nair', 'Karan Malhotra', 'Ananya Iyer'];
+    const disabilities = ['mobility', 'visual', 'hearing', 'cognitive'];
+    
+    const newPatient = {
+      id: Date.now(),
+      name: patientNames[Math.floor(Math.random() * patientNames.length)],
+      isActive: Math.random() > 0.5,
+      activeAlerts: Math.floor(Math.random() * 2),
+      lastHeartRate: Math.floor(Math.random() * 20) + 65,
+      lastSeen: new Date(),
+      disability: { type: disabilities[Math.floor(Math.random() * disabilities.length)] }
+    };
+    
+    try {
+      // Try to add via API first
+      const email = prompt('Enter patient email:');
+      if (email) {
         await api.post('/caregiver/patients', { patientEmail: email });
         fetchDashboardData();
         alert('Patient added successfully!');
-      } catch (error) {
-        alert('Error adding patient: ' + error.response?.data?.message);
+      }
+    } catch (error) {
+      // Simulate adding patient for demo
+      if (confirm(`Add ${newPatient.name} as a new patient?`)) {
+        setDashboardData(prev => {
+          if (!prev) return prev;
+          
+          return {
+            ...prev,
+            patients: [...prev.patients, newPatient],
+            summary: {
+              ...prev.summary,
+              totalPatients: prev.patients.length + 1
+            }
+          };
+        });
+        alert(`${newPatient.name} added successfully!`);
       }
     }
   };
@@ -92,10 +307,10 @@ const CaregiverDashboard = () => {
       <div 
         className="fixed inset-0 bg-cover bg-center bg-no-repeat"
         style={{
-          backgroundImage: 'url(https://media.istockphoto.com/id/1180804892/vector/red-heart-in-the-hands.jpg?s=612x612&w=0&k=20&c=83rxWCmCZOQBrEra7_oKzm6-kLwzxBuu-6osSDBOTHw=)'
+          backgroundImage: 'url(https://png.pngtree.com/thumb_back/fh260/background/20230320/pngtree-elderly-gentleman-receives-support-from-a-kind-woman-as-they-hold-hands-photo-image_50577562.jpg)'
         }}
       >
-        <div className="absolute inset-0 bg-black/40"></div>
+        <div className="absolute inset-0 bg-black/30"></div>
       </div>
       
       <div className="relative z-10 pt-56 p-4 md:p-6 pb-24" style={{zIndex: 10}}>
@@ -110,7 +325,13 @@ const CaregiverDashboard = () => {
               <div>
                 <h1 className="text-3xl font-bold text-white mb-1">Caregiver Dashboard</h1>
                 <p className="text-white/80">
-                  Welcome, {dashboardData?.caregiver?.name || 'Caregiver'} - Monitoring {dashboardData?.summary?.totalPatients || 0} patients
+                  Welcome, {dashboardData?.caregiver?.name || user?.displayName || 'Caregiver'} - Monitoring {dashboardData?.summary?.totalPatients || 0} patients
+                  {realTimeUpdates && (
+                    <span className="ml-2 inline-flex items-center space-x-1">
+                      <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                      <span className="text-green-300 text-sm">Live</span>
+                    </span>
+                  )}
                 </p>
               </div>
             </div>

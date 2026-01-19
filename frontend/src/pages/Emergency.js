@@ -219,9 +219,18 @@ const Emergency = () => {
   const getCurrentLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        (position) => {
+        async (position) => {
           const { latitude, longitude } = position.coords;
-          setCurrentLocation(`${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
+          try {
+            // Use reverse geocoding to get address
+            const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`);
+            const data = await response.json();
+            const address = `${data.locality || data.city || ''}, ${data.principalSubdivision || data.countryName || ''}`;
+            setCurrentLocation(address || `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
+          } catch (error) {
+            // Fallback to coordinates if geocoding fails
+            setCurrentLocation(`${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
+          }
         },
         (error) => {
           setCurrentLocation('Location access denied');
@@ -444,17 +453,30 @@ const Emergency = () => {
       <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/80 backdrop-blur-xl border border-slate-700/50 rounded-3xl p-6 md:p-8 mb-8 shadow-2xl">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-2xl font-bold text-white flex items-center space-x-2">
-            <span>💊</span>
             <span>Medical Alert</span>
           </h3>
-          <button
-            onClick={() => setShowMedicalForm(true)}
-            className="bg-gradient-to-r from-blue-500/20 to-cyan-500/20 text-blue-300 px-4 py-2 rounded-xl border border-blue-400/30 hover:bg-blue-500/30 transition-all"
-          >
-            <div className="flex items-center space-x-2">
-              <span>{medicalProfile ? 'Edit Medical Info' : 'Set Medical Info'}</span>
-            </div>
-          </button>
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => setShowMedicalForm(true)}
+              className="bg-gradient-to-r from-blue-500/20 to-cyan-500/20 text-blue-300 px-4 py-2 rounded-xl border border-blue-400/30 hover:bg-blue-500/30 transition-all"
+            >
+              {medicalProfile ? 'Edit Medical Info' : 'Set Medical Info'}
+            </button>
+            {medicalProfile && (
+              <button
+                onClick={() => {
+                  localStorage.removeItem(`medicalProfile_${user.id}`);
+                  setMedicalProfile(null);
+                  if ('speechSynthesis' in window) {
+                    speechSynthesis.speak(new SpeechSynthesisUtterance('Medical profile deleted'));
+                  }
+                }}
+                className="bg-gradient-to-r from-red-500/20 to-red-600/20 text-red-300 px-4 py-2 rounded-xl border border-red-400/30 hover:bg-red-500/30 transition-all"
+              >
+                Delete
+              </button>
+            )}
+          </div>
         </div>
         
         <div className="bg-white/10 rounded-2xl p-4 border border-white/20 mb-4">
@@ -485,7 +507,6 @@ const Emergency = () => {
       <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/80 backdrop-blur-xl border border-slate-700/50 rounded-3xl p-6 md:p-8 mb-8 shadow-2xl">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-2xl font-bold text-white flex items-center space-x-2">
-            <span>💊</span>
             <span>Medication Reminders</span>
           </h3>
           <button
@@ -508,7 +529,6 @@ const Emergency = () => {
                     <p className="text-white/60 text-sm">{med.dosage} • {med.frequency} at {med.time}</p>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <div className="text-2xl">💊</div>
                     <button
                       onClick={() => deleteMedication(med.id)}
                       className="text-red-400 hover:text-red-300 p-1"
@@ -529,7 +549,7 @@ const Emergency = () => {
 
       {/* Location Sharing */}
       <div className="glass rounded-3xl p-6 md:p-8">
-        <h3 className="text-2xl font-bold text-white mb-6">📍 Location Services</h3>
+        <h3 className="text-2xl font-bold text-white mb-6">Location Services</h3>
         <div className="bg-white/5 rounded-xl p-4 border border-white/10">
           <div className="flex items-center justify-between mb-4">
             <div>

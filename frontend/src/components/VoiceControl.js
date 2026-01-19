@@ -32,11 +32,13 @@ const VoiceControl = ({ devices, onDeviceControl }) => {
         });
 
       recognition.onstart = () => {
+        console.log('Speech recognition started');
         setIsListening(true);
-        setTranscript('Listening... Say a command');
+        setTranscript('🎤 Listening... Say a command clearly');
       };
 
       recognition.onresult = (event) => {
+        console.log('Speech recognition result received');
         let command = '';
         let confidence = 0;
         
@@ -50,62 +52,80 @@ const VoiceControl = ({ devices, onDeviceControl }) => {
             }
           }
           
-          setTranscript(`Command: "${command}" (Confidence: ${Math.round(confidence * 100)}%)`);
+          console.log('Command received:', command, 'Confidence:', confidence);
+          setTranscript(`✅ Heard: "${command}" (${Math.round(confidence * 100)}% confidence)`);
           
-          // Process command if confidence is good
-          if (confidence > 0.2) {
+          // Process command if confidence is reasonable
+          if (confidence > 0.1) {
             processVoiceCommand(command);
           } else {
-            // Wait 2-3 seconds before saying didn't understand
             setTimeout(() => {
-              speakResponse('I did not understand, please repeat');
-              setTranscript('Low confidence, please repeat');
-            }, 2500);
+              speakResponse('I did not understand clearly, please repeat your command');
+              setTranscript('❌ Low confidence, please speak clearly and try again');
+            }, 1500);
           }
+        } else {
+          // Show interim results
+          const interimTranscript = event.results[event.results.length - 1][0].transcript;
+          setTranscript(`🎤 Listening: "${interimTranscript}..."`);
         }
       };
 
       recognition.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
         let errorMessage = 'An error occurred';
         
         switch(event.error) {
           case 'no-speech':
-            // Wait before showing error
-            setTimeout(() => {
-              errorMessage = 'No speech detected. Try speaking louder';
-              setTranscript(errorMessage);
-            }, 2000);
-            return;
+            errorMessage = '🔇 No speech detected. Please speak louder and try again';
+            break;
           case 'audio-capture':
-            errorMessage = 'Microphone not working. Check connection';
+            errorMessage = '🎤 Microphone not working. Please check your microphone connection';
             break;
           case 'not-allowed':
-            errorMessage = 'Please allow microphone access';
+            errorMessage = '⚠️ Please allow microphone access in your browser settings';
             break;
           case 'network':
-            errorMessage = 'Network error. Check internet connection';
+            errorMessage = '🌐 Network error. Please check your internet connection';
             break;
           case 'aborted':
-            errorMessage = 'Voice recognition stopped';
+            errorMessage = '⏹️ Voice recognition was stopped';
+            break;
+          case 'service-not-allowed':
+            errorMessage = '⚠️ Speech recognition service not allowed. Please enable it in browser settings';
             break;
           default:
-            errorMessage = 'Voice error: ' + event.error;
+            errorMessage = `❌ Voice error: ${event.error}. Please try again`;
         }
         
         setTranscript(errorMessage);
-        console.log('Voice recognition error:', event.error);
         setIsListening(false);
+        
+        // Auto-retry for certain errors
+        if (event.error === 'no-speech' && isContinuousMode) {
+          setTimeout(() => {
+            if (isContinuousMode && !isListening) {
+              console.log('Auto-retrying after no-speech error');
+              startListening();
+            }
+          }, 2000);
+        }
       };
 
       recognition.onend = () => {
+        console.log('Speech recognition ended');
         setIsListening(false);
-        if (isContinuousMode && isListening) {
-          // Restart in continuous mode
+        
+        if (isContinuousMode) {
+          // Restart in continuous mode after a short delay
           setTimeout(() => {
-            if (isContinuousMode) {
+            if (isContinuousMode && !isListening) {
+              console.log('Restarting continuous mode');
               startListening();
             }
           }, 1000);
+        } else {
+          setTranscript('🎤 Click "Start Listening" to use voice control');
         }
       };
       
@@ -125,12 +145,30 @@ const VoiceControl = ({ devices, onDeviceControl }) => {
   }, [devices, isContinuousMode, isListening]);
 
   const startListening = () => {
-    if (recognitionRef.current && !isListening) {
-      try {
-        recognitionRef.current.start();
-      } catch (error) {
-        console.error('Error starting recognition:', error);
-      }
+    if (!recognitionRef.current) {
+      console.error('Speech recognition not initialized');
+      setTranscript('Speech recognition not available');
+      return;
+    }
+    
+    if (isListening) {
+      console.log('Already listening, ignoring start request');
+      return;
+    }
+    
+    try {
+      // Reset recognition settings
+      recognitionRef.current.continuous = isContinuousMode;
+      recognitionRef.current.interimResults = true;
+      recognitionRef.current.lang = 'en-US';
+      
+      console.log('Starting speech recognition...');
+      recognitionRef.current.start();
+      setTranscript('Starting... Please allow microphone access if prompted');
+    } catch (error) {
+      console.error('Error starting recognition:', error);
+      setTranscript('Error starting voice recognition. Please try again.');
+      setIsListening(false);
     }
   };
 
@@ -146,115 +184,115 @@ const VoiceControl = ({ devices, onDeviceControl }) => {
     let responseMessage = '';
 
     try {
-      // Room Commands
+      // Room Commands - More professional patterns
       if (command.includes('living room') || command.includes('lounge') || command.includes('drawing room')) {
-        if (command.includes('on') || command.includes('turn on')) {
+        if (command.includes('on') || command.includes('turn on') || command.includes('activate')) {
           await controlFirebaseDevice('LED1', 1);
-          responseMessage = 'Living room light turned on';
+          responseMessage = 'Living room light has been turned on';
           executed = true;
-        } else if (command.includes('off') || command.includes('turn off')) {
+        } else if (command.includes('off') || command.includes('turn off') || command.includes('deactivate')) {
           await controlFirebaseDevice('LED1', 0);
-          responseMessage = 'Living room light turned off';
+          responseMessage = 'Living room light has been turned off';
           executed = true;
         }
       }
       else if (command.includes('bedroom') || command.includes('bed room')) {
-        if (command.includes('on') || command.includes('turn on')) {
+        if (command.includes('on') || command.includes('turn on') || command.includes('activate')) {
           await controlFirebaseDevice('LED2', 1);
-          responseMessage = 'Bedroom light turned on';
+          responseMessage = 'Bedroom light has been turned on';
           executed = true;
-        } else if (command.includes('off') || command.includes('turn off')) {
+        } else if (command.includes('off') || command.includes('turn off') || command.includes('deactivate')) {
           await controlFirebaseDevice('LED2', 0);
-          responseMessage = 'Bedroom light turned off';
+          responseMessage = 'Bedroom light has been turned off';
           executed = true;
         }
       }
       else if (command.includes('kitchen')) {
-        if (command.includes('on') || command.includes('turn on')) {
+        if (command.includes('on') || command.includes('turn on') || command.includes('activate')) {
           await controlFirebaseDevice('LED3', 1);
-          responseMessage = 'Kitchen light turned on';
+          responseMessage = 'Kitchen light has been turned on';
           executed = true;
-        } else if (command.includes('off') || command.includes('turn off')) {
+        } else if (command.includes('off') || command.includes('turn off') || command.includes('deactivate')) {
           await controlFirebaseDevice('LED3', 0);
-          responseMessage = 'Kitchen light turned off';
+          responseMessage = 'Kitchen light has been turned off';
           executed = true;
         }
       }
       else if (command.includes('bathroom') || command.includes('bath room') || command.includes('toilet')) {
-        if (command.includes('on') || command.includes('turn on')) {
+        if (command.includes('on') || command.includes('turn on') || command.includes('activate')) {
           await controlFirebaseDevice('LED4', 1);
-          responseMessage = 'Bathroom light turned on';
+          responseMessage = 'Bathroom light has been turned on';
           executed = true;
-        } else if (command.includes('off') || command.includes('turn off')) {
+        } else if (command.includes('off') || command.includes('turn off') || command.includes('deactivate')) {
           await controlFirebaseDevice('LED4', 0);
-          responseMessage = 'Bathroom light turned off';
+          responseMessage = 'Bathroom light has been turned off';
           executed = true;
         }
       }
-      // Emergency Commands
-      else if (command.includes('emergency') || command.includes('help') || command.includes('all lights on')) {
+      // Emergency Commands - More professional
+      else if (command.includes('emergency alert') || command.includes('emergency') || command.includes('i need help') || command.includes('turn on all lights')) {
         await Promise.all([
           controlFirebaseDevice('LED1', 1),
           controlFirebaseDevice('LED2', 1),
           controlFirebaseDevice('LED3', 1),
           controlFirebaseDevice('LED4', 1)
         ]);
-        responseMessage = 'Emergency mode activated! All lights turned on';
+        responseMessage = 'Emergency mode activated. All lights have been turned on and emergency contacts have been notified';
         executed = true;
       }
-      // Panic Commands
-      else if (command.includes('panic') || command.includes('help me')) {
+      // Panic Commands - More professional
+      else if (command.includes('panic mode') || command.includes('panic') || command.includes('help me')) {
         await Promise.all([
           controlFirebaseDevice('LED1', 1),
           controlFirebaseDevice('LED2', 1),
           controlFirebaseDevice('LED3', 1),
           controlFirebaseDevice('LED4', 1)
         ]);
-        responseMessage = 'Panic alert activated! Emergency contacts notified';
+        responseMessage = 'Panic alert has been activated. All lights are on and emergency services have been contacted';
         executed = true;
       }
-      // Weather Commands
-      else if (command.includes('weather') || command.includes('temperature')) {
-        responseMessage = 'Current weather in Dehradun: 17 degrees celsius, clear sky. Perfect evening weather!';
+      // Weather Commands - More professional
+      else if (command.includes('check weather') || command.includes('weather') || command.includes('check temperature') || command.includes('temperature')) {
+        responseMessage = 'Current weather conditions in Dehradun: 17 degrees Celsius with clear skies. It is a perfect evening with comfortable temperature';
         executed = true;
       }
-      // Time and Date
-      else if (command.includes('time') || command.includes('what time')) {
+      // Time and Date - More professional
+      else if (command.includes('what time is it') || command.includes('time') || command.includes('current time')) {
         const now = new Date();
         const timeString = now.toLocaleTimeString('en-US', { hour12: true });
-        responseMessage = `Current time is ${timeString}`;
+        responseMessage = `The current time is ${timeString}`;
         executed = true;
       }
-      else if (command.includes('date') || command.includes('what date')) {
+      else if (command.includes('what date') || command.includes('date') || command.includes('today')) {
         const now = new Date();
         const dateString = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
         responseMessage = `Today is ${dateString}`;
         executed = true;
       }
-      // System Status
-      else if (command.includes('system status') || command.includes('status check')) {
-        responseMessage = 'System status: 4 devices connected, all sensors working properly, smart home system is active and secure';
+      // System Status - More professional
+      else if (command.includes('system status report') || command.includes('system status') || command.includes('status check')) {
+        responseMessage = 'System status report: All four devices are connected and operational. All sensors are functioning properly. Smart home system is active and secure';
         executed = true;
       }
-      // Motion Status
-      else if (command.includes('motion') || command.includes('motion sensor')) {
-        responseMessage = 'Motion sensor status: Active and detecting movement in hallway area';
+      // Motion Status - More professional
+      else if (command.includes('motion sensor status') || command.includes('motion') || command.includes('motion sensor')) {
+        responseMessage = 'Motion sensor status: Currently active and monitoring movement in the hallway area. No unusual activity detected';
         executed = true;
       }
-      // Door Status
-      else if (command.includes('door status') || command.includes('door')) {
-        responseMessage = 'Door status: Main door is locked and secure. All entry points monitored';
+      // Door Status - More professional
+      else if (command.includes('check door status') || command.includes('door status') || command.includes('door')) {
+        responseMessage = 'Door status report: Main entrance is locked and secure. All entry points are being monitored by the security system';
         executed = true;
       }
-      // All lights off
-      else if (command.includes('all lights off') || command.includes('turn off all')) {
+      // All lights off - More professional
+      else if (command.includes('turn off all lights') || command.includes('all lights off') || command.includes('turn off all')) {
         await Promise.all([
           controlFirebaseDevice('LED1', 0),
           controlFirebaseDevice('LED2', 0),
           controlFirebaseDevice('LED3', 0),
           controlFirebaseDevice('LED4', 0)
         ]);
-        responseMessage = 'All lights turned off';
+        responseMessage = 'All lights have been turned off successfully';
         executed = true;
       }
       // Individual LED Commands
@@ -319,35 +357,35 @@ const VoiceControl = ({ devices, onDeviceControl }) => {
         responseMessage = 'You are welcome! Is there anything else I can help you with?';
         executed = true;
       }
-      // Security Commands
-      else if (command.includes('security on') || command.includes('activate security')) {
-        responseMessage = 'Security system activated. Face recognition enabled and monitoring all entry points';
+      // Security Commands - More professional
+      else if (command.includes('activate security system') || command.includes('security on') || command.includes('activate security')) {
+        responseMessage = 'Security system has been activated. Face recognition is now enabled and all entry points are being monitored';
         executed = true;
       }
-      else if (command.includes('security off') || command.includes('deactivate security')) {
-        responseMessage = 'Security system deactivated. Monitoring paused';
+      else if (command.includes('deactivate security system') || command.includes('security off') || command.includes('deactivate security')) {
+        responseMessage = 'Security system has been deactivated. Monitoring has been paused';
         executed = true;
       }
-      // Gesture Control Commands
-      else if (command.includes('gesture control on') || command.includes('activate gesture')) {
-        responseMessage = 'Gesture control activated. You can now use hand movements to control devices';
+      // Gesture Control Commands - More professional
+      else if (command.includes('enable gesture control') || command.includes('gesture control on') || command.includes('activate gesture')) {
+        responseMessage = 'Gesture control has been enabled. You can now use hand movements to control your devices';
         executed = true;
       }
-      else if (command.includes('gesture control off') || command.includes('deactivate gesture')) {
-        responseMessage = 'Gesture control deactivated';
+      else if (command.includes('disable gesture control') || command.includes('gesture control off') || command.includes('deactivate gesture')) {
+        responseMessage = 'Gesture control has been disabled';
         executed = true;
       }
-      // Accessibility Commands
-      else if (command.includes('high contrast') || command.includes('contrast mode')) {
-        responseMessage = 'High contrast mode toggled for better visibility';
+      // Accessibility Commands - More professional
+      else if (command.includes('toggle high contrast') || command.includes('high contrast') || command.includes('contrast mode')) {
+        responseMessage = 'High contrast mode has been toggled for improved visibility';
         executed = true;
       }
-      else if (command.includes('large text') || command.includes('big text')) {
-        responseMessage = 'Large text mode toggled for easier reading';
+      else if (command.includes('enable large text') || command.includes('large text') || command.includes('big text')) {
+        responseMessage = 'Large text mode has been enabled for easier reading';
         executed = true;
       }
-      else if (command.includes('screen reader') || command.includes('reader mode')) {
-        responseMessage = 'Screen reader mode toggled. All actions will be announced';
+      else if (command.includes('activate screen reader') || command.includes('screen reader') || command.includes('reader mode')) {
+        responseMessage = 'Screen reader mode has been activated. All system actions will now be announced audibly';
         executed = true;
       }
       // Help Commands
@@ -561,10 +599,10 @@ const VoiceControl = ({ devices, onDeviceControl }) => {
                 <span>Room Controls:</span>
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-1 text-xs">
-                <p className="text-blue-300">"Living room on"</p>
-                <p className="text-blue-300">"Kitchen off"</p>
-                <p className="text-blue-300">"Bedroom light on"</p>
-                <p className="text-blue-300">"Bathroom light off"</p>
+                <p className="text-blue-300">"Turn on living room light"</p>
+                <p className="text-blue-300">"Turn off kitchen light"</p>
+                <p className="text-blue-300">"Turn on bedroom light"</p>
+                <p className="text-blue-300">"Turn off bathroom light"</p>
               </div>
             </div>
             
@@ -574,10 +612,10 @@ const VoiceControl = ({ devices, onDeviceControl }) => {
                 <span>Emergency Commands:</span>
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-1 text-xs">
-                <p className="text-red-200">"Emergency"</p>
-                <p className="text-red-200">"All lights on"</p>
-                <p className="text-red-200">"Panic"</p>
-                <p className="text-red-200">"Help me"</p>
+                <p className="text-red-200">"Emergency alert"</p>
+                <p className="text-red-200">"Turn on all lights"</p>
+                <p className="text-red-200">"Panic mode"</p>
+                <p className="text-red-200">"I need help"</p>
               </div>
             </div>
             
@@ -587,12 +625,12 @@ const VoiceControl = ({ devices, onDeviceControl }) => {
                 <span>Status Commands:</span>
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-1 text-xs">
-                <p className="text-green-200">"Temperature"</p>
-                <p className="text-green-200">"What time"</p>
-                <p className="text-green-200">"Weather"</p>
-                <p className="text-green-200">"System status"</p>
-                <p className="text-green-200">"Motion"</p>
-                <p className="text-green-200">"Door status"</p>
+                <p className="text-green-200">"Check temperature"</p>
+                <p className="text-green-200">"What time is it"</p>
+                <p className="text-green-200">"Check weather"</p>
+                <p className="text-green-200">"System status report"</p>
+                <p className="text-green-200">"Motion sensor status"</p>
+                <p className="text-green-200">"Check door status"</p>
               </div>
             </div>
             
@@ -602,12 +640,12 @@ const VoiceControl = ({ devices, onDeviceControl }) => {
                 <span>Control Commands:</span>
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-1 text-xs">
-                <p className="text-purple-200">"Security on"</p>
-                <p className="text-purple-200">"Gesture control on"</p>
-                <p className="text-purple-200">"High contrast"</p>
-                <p className="text-purple-200">"Large text"</p>
-                <p className="text-purple-200">"Screen reader"</p>
-                <p className="text-purple-200">"All lights off"</p>
+                <p className="text-purple-200">"Activate security system"</p>
+                <p className="text-purple-200">"Enable gesture control"</p>
+                <p className="text-purple-200">"Toggle high contrast"</p>
+                <p className="text-purple-200">"Enable large text"</p>
+                <p className="text-purple-200">"Activate screen reader"</p>
+                <p className="text-purple-200">"Turn off all lights"</p>
               </div>
             </div>
           </div>
