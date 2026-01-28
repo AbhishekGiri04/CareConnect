@@ -1,7 +1,7 @@
-<h1 align="center">🏥 CareConnect — Integrated Accessibility Platform</h1>
+<h1 align="center">🏠 CareConnect Smart Home — Intelligent Accessibility Platform</h1>
 
 <p align="center">
-  🚀 A comprehensive accessibility platform with hand gesture control, voice commands, and smart device management for enhanced independence and care.
+  🚀 A comprehensive smart home automation platform with hand gesture control, voice commands, and IoT device management for enhanced independence and accessible living.
 </p>
 
 <p align="center">
@@ -24,7 +24,7 @@ Traditional accessibility solutions are fragmented and complex. Users with mobil
 ---
 
 ## 💡 Our Solution
-CareConnect is an IoT-enabled smart home automation platform designed for accessible and independent living. The system combines gesture control, voice commands, fall detection, motion sensing, temperature monitoring, and smart lighting to create a comprehensive accessibility solution.
+CareConnect Smart Home is an advanced IoT-enabled smart home automation platform designed for accessible and independent living. The system combines gesture control, voice commands, fall detection, motion sensing, temperature monitoring, and smart lighting to create a comprehensive accessibility solution.
 
 - 👋 **Hand Gesture Control** — Control 4 LED devices with 1-4 finger gestures using MediaPipe
 - 🎤 **Voice Commands** — Natural voice control and feedback using Web Speech API
@@ -135,80 +135,69 @@ CareConnect is an IoT-enabled smart home automation platform designed for access
 
 ```
 CareConnect/
-├── 📂 frontend/                    # 🎨 React frontend application (Port 3002)
-│   ├── 📂 public/                  # Public assets
-│   │   ├── 📄 index.html           # HTML template
-│   │   └── 📄 LoadingPage.mov      # Loading animation
+├── 📂 frontend/                    # 🎨 React frontend (Port 3002)
+│   ├── 📂 public/
+│   │   ├── 📄 index.html
+│   │   └── 📄 LoadingPage.mov
 │   ├── 📂 src/
-│   │   ├── 📂 components/          # 🧩 Reusable UI components
-│   │   │   ├── 📄 AccessibilitySettings.js # ♿ Accessibility controls
-│   │   │   ├── 📄 Auth.js          # 🔐 Authentication component
-│   │   │   ├── 📄 Footer.js        # 🔻 Footer component
-│   │   │   ├── 📄 GlobalAccessibility.js # Global accessibility
-│   │   │   ├── 📄 LoadingScreen.js # ⏳ Loading animation
-│   │   │   ├── 📄 Navbar.js        # 🔝 Navigation header
-│   │   │   ├── 📄 SafetyStatus.js  # 🛡️ Safety monitoring
-│   │   │   ├── 📄 TopNavbar.js     # 🔝 Top navigation bar
-│   │   │   └── 📄 VoiceControl.js  # 🎤 Voice command control
-│   │   ├── 📂 context/             # 🔄 React context providers
-│   │   │   ├── 📄 AccessibilityContext.js # ♿ Accessibility state
-│   │   │   ├── 📄 AuthContext.js   # 🔐 Authentication state
-│   │   │   └── 📄 SocketContext.js # 🔌 Socket connection
-│   │   ├── 📂 firebase/            # 🔥 Firebase configuration
-│   │   │   └── 📄 config.js        # Firebase setup
-│   │   ├── 📂 pages/               # 📄 Main application pages
-│   │   │   ├── 📄 Alerts.js        # 🔔 Alert management
-│   │   │   ├── 📄 Analytics.js     # 📊 Analytics dashboard
-│   │   │   ├── 📄 BackendController.js # 🔧 Backend management
-│   │   │   ├── 📄 CaregiverDashboard.js # 👥 Caregiver interface
-│   │   │   ├── 📄 Communication.js # 💬 Communication hub
-│   │   │   ├── 📄 Dashboard.js     # 🏠 Main dashboard
-│   │   │   ├── 📄 DeviceControl.js # 🔌 Device management
-│   │   │   ├── 📄 DeviceSetup.js   # ⚙️ Device configuration
-│   │   │   ├── 📄 Emergency.js     # 🚨 Emergency system
-│   │   │   ├── 📄 GestureControl.js # 👋 Gesture recognition
-│   │   │   ├── 📄 HealthMonitoring.js # 🏥 Health tracking
-│   │   │   └── 📄 Security.js      # 🔒 Security features
-│   │   ├── 📂 services/            # 🔧 API services
-│   │   │   └── 📄 api.js           # API configuration
-│   │   ├── 📄 accessibility-global.js # Global accessibility
-│   │   ├── 📄 accessibility.css    # Accessibility styles
-│   │   ├── 📄 App.js               # 🚀 Main application
-│   │   ├── 📄 index.css            # Global styles
-│   │   └── 📄 index.js             # React entry point
-│   ├── 📄 .env                     # Environment variables
-│   ├── 📄 Dockerfile               # Docker configuration
-│   ├── 📄 package.json             # 📦 Frontend dependencies
-│   └── 📄 tailwind.config.js       # Tailwind CSS config
-├── 📂 backend/                     # 🔧 Node.js backend service (Port 3001)
-│   ├── 📄 .env                     # Backend environment variables
-│   ├── 📄 accessibility-settings.json # Accessibility config
-│   ├── 📄 gesture-mediapipe.js     # MediaPipe gesture detection
-│   ├── 📄 package.json             # 📦 Backend dependencies
-│   └── 📄 server.js                # 🚀 Express server
-├── 📂 hardware/                    # 🔌 IoT Hardware & Sensor Code
-│   ├── 📂 esp32/                   # ESP32 microcontroller code
-│   │   ├── 📄 main.ino             # Main ESP32 Arduino sketch
-│   │   ├── 📄 wifi_config.h        # WiFi configuration
-│   │   └── 📄 sensor_config.h      # Sensor pin definitions
-│   ├── 📂 sensors/                 # Individual sensor modules
-│   │   ├── 📄 mpu6050_fall.ino     # MPU6050 fall detection
-│   │   ├── 📄 dht22_monitor.ino    # DHT22 temperature/humidity
-│   │   ├── 📄 pir_motion.ino       # PIR motion detection
-│   │   └── 📄 led_control.ino      # Smart LED control
-│   ├── 📄 circuit_diagram.png      # Hardware wiring diagram
-│   └── 📄 components_list.md       # Required hardware components
-├── 📂 scripts/                     # 🛠️ Utility scripts
-│   ├── 📄 README.md                # Scripts documentation
-│   ├── 📄 security-check.js        # Security validation
-│   └── 📄 voice-startup.js         # Voice system startup
-├── 📄 .gitignore                   # 🚫 Git ignore patterns
-├── 📄 LICENSE                      # 📜 MIT License
-├── 📄 package.json                 # 📦 Root dependencies
-├── 📄 README.md                    # 📖 Project documentation
-├── 📄 script.js                    # Utility script
-├── 📄 start.js                     # 🚀 Start all services
-└── 📄 start.sh                     # Shell startup script
+│   │   ├── 📂 components/          # 🧩 UI components
+│   │   │   ├── 📄 AccessibilitySettings.js
+│   │   │   ├── 📄 Auth.js
+│   │   │   ├── 📄 Footer.js
+│   │   │   ├── 📄 GlobalAccessibility.js
+│   │   │   ├── 📄 LoadingScreen.js
+│   │   │   ├── 📄 Navbar.js
+│   │   │   ├── 📄 SafetyStatus.js
+│   │   │   ├── 📄 TopNavbar.js
+│   │   │   └── 📄 VoiceControl.js
+│   │   ├── 📂 context/             # 🔄 React contexts
+│   │   │   ├── 📄 AccessibilityContext.js
+│   │   │   ├── 📄 AuthContext.js
+│   │   │   └── 📄 SocketContext.js
+│   │   ├── 📂 firebase/
+│   │   │   └── 📄 config.js
+│   │   ├── 📂 pages/               # 📄 Main pages
+│   │   │   ├── 📄 Alerts.js
+│   │   │   ├── 📄 Analytics.js
+│   │   │   ├── 📄 BackendController.js
+│   │   │   ├── 📄 CaregiverDashboard.js
+│   │   │   ├── 📄 Communication.js
+│   │   │   ├── 📄 Dashboard.js
+│   │   │   ├── 📄 DeviceControl.js
+│   │   │   ├── 📄 DeviceSetup.js
+│   │   │   ├── 📄 Emergency.js
+│   │   │   ├── 📄 GestureControl.js
+│   │   │   ├── 📄 HealthMonitoring.js
+│   │   │   └── 📄 Security.js
+│   │   ├── 📂 services/
+│   │   │   └── 📄 api.js
+│   │   ├── 📄 App.js
+│   │   ├── 📄 index.css
+│   │   └── 📄 index.js
+│   ├── 📄 package.json
+│   └── 📄 tailwind.config.js
+├── 📂 backend/                     # 🔧 Node.js backend (Port 3001)
+│   ├── 📄 gesture-mediapipe.js
+│   ├── 📄 package.json
+│   └── 📄 server.js
+├── 📂 hardware/                    # 🔌 IoT Hardware Code
+│   ├── 📂 esp32/
+│   │   ├── 📄 main.ino
+│   │   ├── 📄 wifi_config.h
+│   │   └── 📄 sensor_config.h
+│   ├── 📂 sensors/
+│   │   ├── 📄 mpu6050_fall.ino
+│   │   ├── 📄 dht22_monitor.ino
+│   │   ├── 📄 pir_motion.ino
+│   │   └── 📄 led_control.ino
+│   └── 📄 circuit_diagram.png
+├── 📂 scripts/
+│   ├── 📄 security-check.js
+│   └── 📄 voice-startup.js
+├── 📄 package.json
+├── 📄 README.md
+├── 📄 start.js
+└── 📄 start.sh
 ```
 <br>
 
@@ -460,38 +449,11 @@ REACT_APP_FIREBASE_APP_ID=your-app-id
 
 <br>
 
----  
-
-## 👥 Team
-
-| Member | Role | Contribution |
-|--------|------|--------------|
-| **Abhishek Giri** | Team Lead & Full-stack Developer | Architecture Design, Gesture Control, Backend Development, Frontend Development |
-
-<br>
-
----
-
-## 🌐 Deployment
-
-**🚀 Local Development:**
-```bash
-Frontend: http://localhost:3002
-Backend:  http://localhost:3001
-```
-
-**Production Deployment:**
-- Frontend: Deploy to Vercel/Netlify
-- Backend: Deploy to Heroku/Railway
-- Database: Firebase Firestore
-
-<br>
-
 ---
 
 ## 📞 Help & Contact  
 
-> 💬 *Got questions or need assistance with CareConnect?*  
+> 💬 *Got questions or need assistance with CareConnect Smart Home?*  
 > We're here to help with integration and customization!
 
 <div align="center">
@@ -525,11 +487,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 <div align="center">
 
-**🏥 Built with ❤️ for Enhanced Accessibility**  
-*Empowering independence through accessible technology*
+**🏠 Built with ❤️ for Smart Home Accessibility**  
+*Empowering independence through intelligent automation*
 
 ---
 
-**© 2026 CareConnect. All Rights Reserved.**
+**© 2026 CareConnect Smart Home. All Rights Reserved.**
 
 </div>
